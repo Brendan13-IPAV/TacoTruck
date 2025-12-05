@@ -96,7 +96,16 @@
     <p class="fineprint">Prototype only — provides general information, not legal advice.</p>
   </div>
 
-  <script>
-    const messagesEl = document.getElementById('messages');
-    const inputEl = document.getElementById('input');
-    const sendBtn = document.g
+ <script>
+  async function getReplyDemo(userText) {
+    // replaced with live outline call:
+    const res = await fetch('https://<your-vercel-domain>/api/intent-outline', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ user_input: userText })
+    });
+    const data = await res.json();
+    return data.outline || 'No outline.';
+  }
+</script>
+
