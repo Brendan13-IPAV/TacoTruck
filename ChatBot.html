@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Australian IP – Chatbot Prototype</title>
+  <title>TacoTruck – ChatBot Prototype</title>
   <style>
     :root {
       --bg: linear-gradient(135deg, #f8fafc 0%, #fff7ed 100%);
       --border: rgba(2,6,23,0.08);
       --ink: #0f172a;
       --muted: #475569;
-      --accentA: #d97706; /* amber-600 */
-      --accentB: #c2410c; /* orange-700 */
+      --accentA: #d97706;
+      --accentB: #c2410c;
     }
     * { box-sizing: border-box; }
     body {
@@ -74,124 +74,29 @@
 </head>
 <body>
   <div class="wrap">
-    <div class="logo" aria-hidden="true">💬</div>
-    <h1>Australian IP question tester</h1>
-    <p class="sub">General information about Australian IP law (prototype)</p>
+    <div class="logo" aria-hidden="true">🌮</div>
+    <h1>TacoTruck ChatBot</h1>
+    <p class="sub">Australian IP question tester (prototype)</p>
 
     <div class="card" role="region" aria-label="Chat window">
-      <div id="messages" class="messages">
-        <!-- Initial assistant message -->
-      </div>
+      <div id="messages" class="messages"></div>
 
       <div class="footer">
         <div class="controls">
           <textarea id="input" rows="2" placeholder="Ask about Australian patents, trade marks, copyright…"></textarea>
           <div style="display:flex; flex-direction:column; gap:8px;">
-            <button id="send" class="send" aria-label="Send">Send</button>
-            <button id="clear" class="clear" aria-label="Clear conversation">Clear</button>
+            <button id="send" class="send">Send</button>
+            <button id="clear" class="clear">Clear</button>
           </div>
         </div>
         <div class="hint">Enter = send · Shift+Enter = new line</div>
       </div>
     </div>
 
-    <p class="fineprint">Prototype — general information only, not legal advice.</p>
+    <p class="fineprint">Prototype only — provides general information, not legal advice.</p>
   </div>
 
   <script>
-    // --- Minimal state ---
     const messagesEl = document.getElementById('messages');
     const inputEl = document.getElementById('input');
-    const sendBtn = document.getElementById('send');
-    const clearBtn = document.getElementById('clear');
-
-    /** Render a message bubble */
-    function addMessage(role, content) {
-      const row = document.createElement('div');
-      row.className = 'row ' + (role === 'user' ? 'user' : 'assistant');
-
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.textContent = content;
-
-      row.appendChild(bubble);
-      messagesEl.appendChild(row);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    /** Initial greeting */
-    function resetConversation() {
-      messagesEl.innerHTML = '';
-      addMessage(
-        'assistant',
-        "Hello! I'm here to help you test questions about Australian intellectual property law.\n\n" +
-        "I provide general information only — not legal advice. For advice about your situation, please consult a qualified legal professional.\n\n" +
-        "What would you like to know?"
-      );
-      inputEl.value = '';
-      inputEl.focus();
-    }
-
-    /** Demo reply (no API key needed). Replace this later with a real fetch. */
-    async function getReplyDemo(userText) {
-      // Simulate thinking
-      await new Promise(r => setTimeout(r, 500));
-      return (
-        "Demo mode reply.\n\n" +
-        "You asked: “" + userText + "”.\n\n" +
-        "When wired to OpenAI, this will return general information about Australian IP law only (no specific legal advice)."
-      );
-    }
-
-    /** Optional: placeholder for future real call (server-side recommended)
-    async function getReplyReal(history) {
-      const res = await fetch('/api/openai-chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ history })
-      });
-      const data = await res.json();
-      return data.reply || 'Sorry, no response.';
-    } */
-
-    /** Send flow */
-    async function send() {
-      const text = inputEl.value.trim();
-      if (!text) return;
-
-      addMessage('user', text);
-      inputEl.value = '';
-      inputEl.focus();
-
-      // Show spinner bubble
-      const thinking = document.createElement('div');
-      thinking.className = 'row assistant';
-      thinking.innerHTML = '<div class="bubble" style="display:flex;align-items:center;"><span class="spinner"></span>Thinking…</div>';
-      messagesEl.appendChild(thinking);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-
-      try {
-        // For now, use demo. Swap to getReplyReal([...history]) later.
-        const reply = await getReplyDemo(text);
-        thinking.remove();
-        addMessage('assistant', reply);
-      } catch (e) {
-        thinking.remove();
-        addMessage('assistant', 'Sorry, something went wrong. Please try again.');
-      }
-    }
-
-    // Events
-    sendBtn.addEventListener('click', send);
-    clearBtn.addEventListener('click', resetConversation);
-    inputEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault(); send();
-      }
-    });
-
-    // Boot
-    resetConversation();
-  </script>
-</body>
-</html>
+    const sendBtn = document.g
