@@ -514,20 +514,12 @@
     });
 
     // Continue button (on success screen)
-    const continueButton = document.getElementById('continueButton');
-    continueButton.addEventListener('click', () => {
-      // In production, this would launch/open the chatbot interface
-      console.log('Launching chatbot...');
-      alert('This would launch the chatbot. In production, replace this with your chatbot initialisation code.');
-      
-      // Example: Redirect to chatbot page
-      // window.location.href = '/chatbot';
-      
-      // Example: Show chatbot widget
-      // document.getElementById('chatbot-widget').style.display = 'block';
-      
-      // Example: Call chatbot initialisation function
-      // initialiseChatbot();
+const continueButton = document.getElementById('continueButton');
+
+continueButton.addEventListener('click', () => {
+  window.top.location.href = '../ChatBot.html';
+});
+
     });
 
     function updateStep() {
