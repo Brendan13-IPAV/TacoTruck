@@ -174,13 +174,13 @@
     }
 
     .step[data-step="1"] .step-icon {
-      background: linear-gradient(135deg, #A5D6FF 0%, #1CB0F6 100%);
-      box-shadow: 0 4px 16px rgba(28, 176, 246, 0.4);
+      background: linear-gradient(135deg, #FFE082 0%, #FFC800 100%);
+      box-shadow: 0 4px 16px rgba(255, 200, 0, 0.4);
     }
 
     .step[data-step="2"] .step-icon {
-      background: linear-gradient(135deg, #FFE082 0%, #FFC800 100%);
-      box-shadow: 0 4px 16px rgba(255, 200, 0, 0.4);
+      background: linear-gradient(135deg, #A5D6FF 0%, #1CB0F6 100%);
+      box-shadow: 0 4px 16px rgba(28, 176, 246, 0.4);
     }
 
     .step[data-step="3"] .step-icon {
@@ -221,13 +221,13 @@
     .step[data-step="1"] .step-title {
       font-size: 36px;
       font-weight: 900;
-      background: linear-gradient(135deg, var(--blue-primary) 0%, var(--purple-accent) 100%);
+      background: linear-gradient(135deg, var(--orange-accent) 0%, var(--pink-accent) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       padding-left: 24px;
       margin-left: -24px;
-      border-left: 6px solid var(--blue-primary);
+      border-left: 6px solid var(--orange-accent);
       margin-bottom: 20px;
       animation: pulse 2s ease-in-out infinite;
     }
@@ -531,7 +531,7 @@
     <!-- Progress bar section -->
     <div class="progress-section" id="progressSection">
       <div class="progress-header">
-        <span class="progress-text">Before we begin</span>
+        <span class="progress-text">Important information</span>
         <span class="progress-count" id="progressCount">Step 1 of 4</span>
       </div>
       <div class="progress-bar-container">
@@ -541,8 +541,8 @@
 
     <!-- Header section -->
     <div class="header-section visible" id="headerSection">
-      <h1>Before we begin...</h1>
-      <p>A few things worth knowing about using this chatbot</p>
+      <h1>Before we begin</h1>
+      <p>Let's go through a few important things you should know about using this chatbot. It'll only take a minute.</p>
     </div>
 
     <!-- Content section -->
@@ -552,15 +552,17 @@
         <div class="step-header">
           <div class="step-icon">
             <svg viewBox="0 0 24 24">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
             </svg>
           </div>
-          <h2 class="step-title">This chatbot isn't a lawyer</h2>
+          <h2 class="step-title">General information only</h2>
         </div>
         <p class="step-description">
-          Think of this tool as a helpful guide, not as legal advice. It can point you in the right direction and share useful information, but it can't replace advice from a qualified professional.
+          This chatbot does not provide legal advice. Any response you receive should only be considered general information and must not be treated as official or legal advice.
         </p>
-        <a href="#" class="step-link">Learn more about what this chatbot can do</a>
+        <a href="#" class="step-link">Learn more about the chatbot here</a>
       </div>
 
       <!-- Step 2 -->
@@ -571,12 +573,12 @@
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
           </div>
-          <h2 class="step-title">Keep your personal details private</h2>
+          <h2 class="step-title">Do not share identifiable information</h2>
         </div>
         <p class="step-description">
-          We automatically try to remove identifying information, but our system isn't perfect. Avoid sharing specific business names, addresses, or anything else that could identify you or your situation.
+          Although the system automatically removes personal details, this process is not perfect. If you enter business names, locations, or other identifying information, it may still be stored.
         </p>
-        <a href="#" class="step-link">Read our privacy and data handling policy</a>
+        <a href="#" class="step-link">Learn more about how we capture and use your data</a>
       </div>
 
       <!-- Step 3 -->
@@ -589,12 +591,12 @@
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
           </div>
-          <h2 class="step-title">AI sometimes gets things wrong</h2>
+          <h2 class="step-title">AI may produce false information</h2>
         </div>
         <p class="step-description">
-          This chatbot does its best, but it can make mistakes or misunderstand your question. Always double-check any links or information it provides before relying on it.
+          The AI may occasionally generate statements that are wrong or completely made up. You are responsible for checking all source information to ensure nothing has been misquoted or misrepresented.
         </p>
-        <a href="#" class="step-link">Find out how the chatbot works</a>
+        <a href="#" class="step-link">Learn more about how the chatbot works</a>
       </div>
 
       <!-- Step 4 -->
@@ -606,12 +608,12 @@
               <polyline points="9 22 9 12 15 12 15 22"></polyline>
             </svg>
           </div>
-          <h2 class="step-title">Your chat won't be saved</h2>
+          <h2 class="step-title">Your conversation cannot be recovered</h2>
         </div>
         <p class="step-description">
-          Once you close this page or leave the website, your conversation disappears. If you need a record of what was discussed, download or save it before you go.
+          Once you leave the website, your conversation cannot be recovered. If you want a copy, you must download it yourself before exiting.
         </p>
-        <a href="#" class="step-link">Learn about our data retention practices</a>
+        <a href="#" class="step-link">Learn more about how we capture and store your data</a>
       </div>
     </div>
 
@@ -630,12 +632,12 @@
         </svg>
       </div>
       <h2>You're all set!</h2>
-      <p>Thanks for taking the time to read through that. Let's get started with your question.</p>
+      <p>You can now start chatting with the bot</p>
       <button class="continue-button" id="continueButton">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
-        Start chatting
+        Continue to chatbot
       </button>
     </div>
   </div>
@@ -660,13 +662,13 @@
 
     // Step-specific button text
     const nextButtonText = {
-      1: "Understood, this isn't legal advice",
-      2: "I won't share identifying details",
-      3: "I'll verify the information",
-      4: "Got it, I'll save if needed"
+      1: "I understand this is general information only",
+      2: "I will not share identifiable information",
+      3: "I will verify all information provided",
+      4: "I understand my conversation cannot be recovered"
     };
 
-    // Initialise with first step visible
+    // Initialize with first step visible
     updateStep();
 
     // Next button
@@ -701,10 +703,10 @@
     continueButton.addEventListener('click', () => {
       // In production, this would launch/open the chatbot interface
       console.log('Launching chatbot...');
-      alert('Chatbot would start here! Replace this function with your chatbot launch code.');
+      alert('This would launch the chatbot. In production, replace this with your chatbot initialisation code.');
       
       // Example: Redirect to chatbot page
-      // window.location.href = '/chat';
+      // window.location.href = '/chatbot';
       
       // Example: Show chatbot widget
       // document.getElementById('chatbot-widget').style.display = 'block';
@@ -750,7 +752,7 @@
       }
     }
 
-    // Prevent link default behaviour in demo
+    // Prevent link default behavior in demo
     document.querySelectorAll('.step-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
