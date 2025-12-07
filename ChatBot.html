@@ -108,4 +108,93 @@
     return data.outline || 'No outline.';
   }
 </script>
+  <!-- Logger (kept at root; adjust path if needed) -->
+<script src="tt-logger.js"></script>
+
+<script>
+  // --- Minimal chat wiring + telemetry ---
+  const messagesEl = document.getElementById('messages');
+  const inputEl = document.getElementById('input');
+  const sendBtn = document.getElementById('send');
+  const clearBtn = document.getElementById('clear');
+
+  function addMessage(role, content) {
+    const row = document.createElement('div');
+    row.className = 'row ' + (role === 'user' ? 'user' : 'assistant');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = content;
+    row.appendChild(bubble);
+    messagesEl.appendChild(row);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function resetConversation() {
+    messagesEl.innerHTML = '';
+    addMessage(
+      'assistant',
+      "Hello! I'm here to help you test questions about Australian intellectual property law.\n\n" +
+      "I provide general information only — not legal advice. For advice about your situation, please consult a qualified legal professional.\n\n" +
+      "What would you like to know?"
+    );
+    inputEl.value = '';
+    inputEl.focus();
+  }
+
+  async function send() {
+    const text = (inputEl.value || '').trim();
+    if (!text) return;
+
+    addMessage('user', text);
+    TTLOG && TTLOG.push('chat_user_turn', { text_len: text.length });
+
+    inputEl.value = '';
+    inputEl.focus();
+
+    // spinner bubble
+    const thinking = document.createElement('div');
+    thinking.className = 'row assistant';
+    thinking.innerHTML =
+      '<div class="bubble" style="display:flex;align-items:center;">' +
+      '<span class="spinner"></span>Thinking…</div>';
+    messagesEl.appendChild(thinking);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    const t0 = performance.now();
+    try {
+      const reply = await getReplyDemo(text); // your existing function above
+      thinking.remove();
+      addMessage('assistant', reply);
+      TTLOG && TTLOG.push('chat_bot_turn', { rt_ms: Math.round(performance.now() - t0) });
+    } catch (e) {
+      thinking.remove();
+      addMessage('assistant', 'Error: could not process your message.');
+      TTLOG && TTLOG.push('chat_error', { message: String(e) });
+    }
+  }
+
+  // hook up UI
+  sendBtn.addEventListener('click', send);
+  clearBtn.addEventListener('click', () => {
+    resetConversation();
+    TTLOG && TTLOG.push('chat_cleared');
+  });
+  inputEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  });
+
+  // telemetry bookends
+  TTLOG && TTLOG.push('chat_start');
+  window.addEventListener('beforeunload', () => TTLOG && TTLOG.push('chat_end'));
+
+  // boot
+  resetConversation();
+</script>
+
+</body>
+</html>
+
 
