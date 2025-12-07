@@ -169,3 +169,245 @@
       <div style="clear:both;"></div>
 
       <p><strong>Prompt suggestion:</strong> <span id="suggestion">—</span></p>
+
+      <div class="chatInputRow">
+        <input id="userInput" type="text" placeholder="Type your question…" />
+        <button id="sendMsg">Send</button>
+      </div>
+
+      <div id="chatLog"></div>
+
+      <div class="actions">
+        <button id="followUp" class="ghost">Ask follow-up</button>
+        <button id="rateNext">Rate &amp; next</button>
+      </div>
+
+      <div id="ratingRow" class="hidden" style="margin-top:20px;">
+        <p><strong>Rate this test:</strong></p>
+        <button class="ghost" data-rate="1">👍</button>
+        <button class="ghost" data-rate="-1">👎</button>
+        <button class="ghost" data-rate="0">🤷</button>
+      </div>
+    </section>
+
+    <!-- Step 3: Completed -->
+    <section id="stepDone" class="hidden">
+      <h2>All tests complete</h2>
+      <p>Thank you for participating.</p>
+
+      <div class="actions">
+        <button class="ghost" onclick="window.open('https://qualtrics.com','_blank')">Complete short survey</button>
+        <button id="restart" class="ghost">Start over</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- The exact same JS logic from previous runner goes here, unchanged -->
+ <script>
+  /* ---------- CONFIG: map the versions you actually have ---------- */
+  // If your files are .txt, put .txt here; if you renamed to .html, use .html
+  const DISCLAIMER_FILES = [
+    { id: "A", url: "./disclaimers/disclaimerA.html" }, // or .txt
+    { id: "C", url: "./disclaimers/disclaimerC.html" }  // or .txt
+    // Add more as you create them, e.g. { id: "B", url: "./disclaimers/disclaimerB.html" }
+  ];
+
+  /* ---------- Small helpers ---------- */
+  const SUGGESTIONS = [
+    "Ask how to revive an expired trade mark",
+    "Ask why two similar trade marks are both registered",
+    "Ask how to request an online takedown",
+    "Ask what ‘novelty’ means for patents",
+    "Ask when to send a cease & desist"
+  ];
+  function nowISO(){ return new Date().toISOString(); }
+  function newSessionId(){ return 'tt_' + Math.random().toString(36).slice(2,10); }
+  function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function getLogs(){ try { return JSON.parse(localStorage.getItem('tt_logs')||'{}'); } catch { return {}; } }
+  function setLogs(x){ localStorage.setItem('tt_logs', JSON.stringify(x)); }
+  function pushEvent(e){
+    const logs = getLogs();
+    if(!logs.events) logs.events = [];
+    logs.events.push(e);
+    setLogs(logs);
+  }
+
+  /* ---------- Elements ---------- */
+  const sessEl = document.getElementById('sessionId');
+  const discVersionEl = document.getElementById('discVersion');
+  const discFrame = document.getElementById('discFrame');
+  const stepDisclaimer = document.getElementById('stepDisclaimer');
+  const stepChat = document.getElementById('stepChat');
+  const stepDone = document.getElementById('stepDone');
+  const acceptBtn = document.getElementById('acceptDisclaimer');
+  const endEarly = document.getElementById('endEarly');
+  const restart = document.getElementById('restart');
+  const testCounter = document.getElementById('testCounter');
+  const suggestionEl = document.getElementById('suggestion');
+  const userInput = document.getElementById('userInput');
+  const sendMsg = document.getElementById('sendMsg');
+  const chatLog = document.getElementById('chatLog');
+  const followUp = document.getElementById('followUp');
+  const rateNext = document.getElementById('rateNext');
+  const ratingRow = document.getElementById('ratingRow');
+
+  /* ---------- In-page error banner (no devtools needed) ---------- */
+  const errorBar = document.createElement('div');
+  Object.assign(errorBar.style, {
+    position:'fixed', left:'0', right:'0', top:'0', zIndex:'9999',
+    background:'#fee2e2', color:'#7f1d1d', padding:'8px 12px',
+    fontFamily:'system-ui,Segoe UI,Roboto,Inter,Arial', fontSize:'13px',
+    display:'none', borderBottom:'1px solid #fecaca'
+  });
+  document.body.appendChild(errorBar);
+  function showError(msg){
+    errorBar.textContent = msg;
+    errorBar.style.display = 'block';
+  }
+
+  /* ---------- State ---------- */
+  let session_id, disclaimerVersion, discStart, testIndex=1, turn=0, followups=0;
+  let currentSuggestion = "";
+
+  function show(el){ el.classList.remove('hidden'); }
+  function hide(el){ el.classList.add('hidden'); }
+
+  /* ---------- Robust disclaimer loader ---------- */
+  async function loadDisclaimerIntoIframe(file){
+    // 1) show version label immediately
+    discVersionEl.textContent = file.id;
+
+    try {
+      // 2) fetch first, so we can give a clear message if 404
+      const res = await fetch(file.url, { cache:'no-store' });
+      if (!res.ok) throw new Error(`Failed to load ${file.url} (HTTP ${res.status})`);
+      const html = await res.text();
+
+      // 3) turn the fetched HTML into a blob URL so paths are safe
+      const blob = new Blob([html], { type: 'text/html' });
+      const blobUrl = URL.createObjectURL(blob);
+      discFrame.src = blobUrl;
+
+      // 4) log success
+      pushEvent({type:'disclaimer_loaded', session_id, version:file.id, ts:nowISO(), url:file.url});
+    } catch (err) {
+      showError(`Disclaimer load error: ${err.message}. Check the filename & path in DISCLAIMER_FILES.`);
+      discFrame.remove(); // avoid empty border
+      const fallback = document.createElement('div');
+      fallback.style.cssText = 'margin-top:12px;padding:12px;border:1px solid #e2e8f0;border-radius:8px;background:#fff';
+      fallback.innerHTML = `<strong>Couldn’t load disclaimer ${file.id}</strong><br><code>${file.url}</code>`;
+      stepDisclaimer.appendChild(fallback);
+      pushEvent({type:'disclaimer_load_error', session_id, version:file.id, ts:nowISO(), error:String(err)});
+    }
+  }
+
+  /* ---------- Session flow ---------- */
+  function startSession(){
+    const logs = { session_id:newSessionId(), started_at:nowISO(), events:[] };
+    setLogs(logs);
+    session_id = logs.session_id;
+    sessEl.textContent = session_id;
+
+    // Pick a random file from the configured list
+    const chosen = pickRandom(DISCLAIMER_FILES);
+    disclaimerVersion = chosen.id;
+
+    // Record the moment we *show* the disclaimer step
+    discStart = Date.now();
+    pushEvent({type:'disclaimer_shown', session_id, version:disclaimerVersion, ts:nowISO(), url:chosen.url});
+
+    // Load it safely
+    loadDisclaimerIntoIframe(chosen);
+  }
+
+  acceptBtn.addEventListener('click', ()=>{
+    const discEnd = Date.now();
+    const seconds = Math.round((discEnd - discStart)/1000);
+    pushEvent({type:'disclaimer_accepted', session_id, version:disclaimerVersion, seconds, ts:nowISO()});
+    hide(stepDisclaimer);
+    startTestLoop();
+  });
+
+  function startTestLoop(){
+    show(stepChat);
+    setupTest();
+  }
+
+  function setupTest(){
+    if(testIndex>5){
+      hide(stepChat); show(stepDone);
+      pushEvent({type:'tests_completed', session_id, total:5, ts:nowISO()});
+      return;
+    }
+    testCounter.textContent = `Test ${testIndex} of 5`;
+    currentSuggestion = SUGGESTIONS[(testIndex-1)%SUGGESTIONS.length];
+    suggestionEl.textContent = currentSuggestion;
+    userInput.value = '';
+    chatLog.innerHTML = '';
+    turn = 0; followups = 0;
+    ratingRow.classList.add('hidden');
+    followUp.disabled = false;
+    pushEvent({type:'test_setup', session_id, test_number:testIndex, suggestion:currentSuggestion, ts:nowISO()});
+  }
+
+  function addChat(role,text){
+    const row = document.createElement('div');
+    row.textContent = (role==='user'?'You: ':'Bot: ') + text;
+    chatLog.appendChild(row);
+  }
+
+  sendMsg.addEventListener('click', ()=>{
+    const text = (userInput.value||'').trim();
+    if(!text) return;
+    turn+=1;
+    addChat('user',text);
+    pushEvent({type:'turn',session_id,test_number:testIndex,turn,role:'user',message:text,ts:nowISO()});
+
+    const botStart = performance.now();
+    setTimeout(()=>{
+      const botMsg = `Outline-only placeholder for: "${text}"`;
+      addChat('bot',botMsg);
+      const rt = Math.round(performance.now()-botStart);
+      pushEvent({type:'turn',session_id,test_number:testIndex,turn,role:'bot',message:botMsg,response_time_ms:rt,ts:nowISO()});
+    },400);
+
+    userInput.value = '';
+  });
+
+  followUp.addEventListener('click', ()=>{
+    followups++;
+    if(followups>=2) followUp.disabled = true;
+  });
+
+  rateNext.addEventListener('click', ()=>{
+    ratingRow.classList.remove('hidden');
+  });
+
+  ratingRow.addEventListener('click',(e)=>{
+    const v = e.target?.getAttribute?.('data-rate');
+    if(v===null) return;
+    pushEvent({type:'rating',session_id,test_number:testIndex,rating:Number(v),ts:nowISO()});
+    testIndex++;
+    setupTest();
+  });
+
+  endEarly.addEventListener('click',()=>{
+    pushEvent({type:'abandoned',session_id,at_test:testIndex,ts:nowISO()});
+    hide(stepChat); show(stepDone);
+  });
+
+  restart.addEventListener('click',()=>{
+    localStorage.removeItem('tt_logs');
+    location.href = 'index.html';
+  });
+
+  // Surface runtime JS errors to the banner (since devtools may be blocked)
+  window.addEventListener('error', (e) => showError(`JS error: ${e.message}`));
+
+  // Start
+  startSession();
+</script>
+
+</body>
+</html>
