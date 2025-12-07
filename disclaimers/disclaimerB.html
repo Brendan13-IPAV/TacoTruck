@@ -1,1 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot disclaimer - Sequential version</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
+    /* Fun, bright colour scheme */
+    :root {
+      --green-primary: #58CC02;
+      --green-hover: #46A302;
+      --blue-primary: #1CB0F6;
+      --orange-accent: #FF9600;
+      --pink-accent: #FF4B91;
+      --yellow-accent: #FFC800;
+      --purple-accent: #CE82FF;
+      --bg-white: #ffffff;
+      --bg-light: #F7F7F7;
+      --text-primary: #3C3C3C;
+      --text-secondary: #777777;
+      --border: #E5E5E5;
+      --progress-bg: #E5E5E5;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Nunito", sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      color: var(--text-primary);
+    }
+
+    .container {
+      background-color: var(--bg-white);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+      max-width: 720px;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Progress bar section */
+    .progress-section {
+      background-color: var(--bg-white);
+      padding: 24px 40px;
+      border-bottom: 3px solid var(--bg-light);
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .progress-text {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--blue-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .progress-count {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--green-primary);
+      background-color: #E8F9E8;
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 12px;
+      background-color: var(--progress-bg);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-primary) 0%, var(--blue-primary) 100%);
+      border-radius: 12px;
+      transition: width 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    /* Header section */
+    .header-section {
+      padding: 24px 40px 16px 40px;
+      border-bottom: 3px solid var(--bg-light);
+      display: none;
+      background: linear-gradient(135deg, #E8F9E8 0%, #E3F2FD 100%);
+    }
+
+    .header-section.visible {
+      display: block;
+    }
+
+    .header-section h1 {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .header-section p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    /* Content section */
+    .content-section {
+      padding: 40px;
+    }
+
+    .step {
+      display: none;
+    }
+
+    .step.active {
+      display: block;
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .step-header {
+      margin-bottom: 28px;
+    }
+
+    .step-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .step[data-step="1"] .step-icon {
+      background: linear-gradient(135deg, #A5D6FF 0%, #1CB0F6 100%);
+      box-shadow: 0 4px 16px rgba(28, 176, 246, 0.4);
+    }
+
+    .step[data-step="2"] .step-icon {
+      background: linear-gradient(135deg, #FFE082 0%, #FFC800 100%);
+      box-shadow: 0 4px 16px rgba(255, 200, 0, 0.4);
+    }
+
+    .step[data-step="3"] .step-icon {
+      background: linear-gradient(135deg, #FFAFCC 0%, #FF4B91 100%);
+      box-shadow: 0 4px 16px rgba(255, 75, 145, 0.4);
+    }
+
+    .step[data-step="4"] .step-icon {
+      background: linear-gradient(135deg, #E0BBE4 0%, #CE82FF 100%);
+      box-shadow: 0 4px 16px rgba(206, 130, 255, 0.4);
+    }
+
+    .step-icon:hover {
+      transform: scale(1.1) rotate(5deg);
+      animation: none;
+    }
+
+    .step-icon svg {
+      width: 36px;
+      height: 36px;
+      stroke: #ffffff;
+      fill: none;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    .step-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-primary);
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+
+    /* Strong emphasis for Step 1 title */
+    .step[data-step="1"] .step-title {
+      font-size: 36px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--blue-primary) 0%, var(--purple-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      padding-left: 24px;
+      margin-left: -24px;
+      border-left: 6px solid var(--blue-primary);
+      margin-bottom: 20px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.8;
+      }
+    }
+
+    .step-description {
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    .step-link {
+      color: var(--blue-primary);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background-color: #E3F2FD;
+      border-radius: 16px;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .step-link:hover {
+      background-color: var(--blue-primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(28, 176, 246, 0.4);
+    }
+
+    .step-link::after {
+      content: '→';
+      font-size: 18px;
+      transition: transform 0.3s ease;
+    }
+
+    .step-link:hover::after {
+      transform: translateX(4px);
+    }
+
+    /* Navigation section */
+    .navigation-section {
+      padding: 28px 40px;
+      background: linear-gradient(135deg, #F7F7F7 0%, #E8F9E8 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      border-top: 3px solid var(--border);
+    }
+
+    .nav-button {
+      padding: 14px 28px;
+      border-radius: 16px;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      border: 3px solid transparent;
+      min-width: 120px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-next {
+      min-width: 240px;
+    }
+
+    .btn-back {
+      background-color: white;
+      color: var(--text-secondary);
+      border-color: var(--border);
+    }
+
+    .btn-back:hover:not(:disabled) {
+      border-color: var(--blue-primary);
+      color: var(--blue-primary);
+      transform: scale(1.05);
+      animation: squash 0.6s ease infinite;
+    }
+
+    @keyframes squash {
+      0%, 100% {
+        transform: scale(1.05, 1);
+      }
+      50% {
+        transform: scale(0.95, 1.1);
+      }
+    }
+
+    .btn-back:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .btn-next,
+    .btn-start {
+      background: linear-gradient(135deg, var(--green-primary) 0%, #46A302 100%);
+      color: white;
+      border-color: var(--green-primary);
+      box-shadow: 0 6px 0 #46A302;
+      position: relative;
+      top: 0;
+    }
+
+    .btn-next:hover,
+    .btn-start:hover {
+      top: 2px;
+      box-shadow: 0 4px 0 #46A302;
+      animation: wiggle 0.6s ease infinite;
+    }
+
+    @keyframes wiggle {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      25% {
+        transform: rotate(-3deg) scale(1.05);
+      }
+      75% {
+        transform: rotate(3deg) scale(1.05);
+      }
+    }
+
+    .btn-next:active,
+    .btn-start:active {
+      top: 6px;
+      box-shadow: 0 0 0 #46A302;
+    }
+
+    .btn-start {
+      min-width: 200px;
+      margin-left: auto;
+    }
+
+    /* Success screen */
+    .success-screen {
+      display: none;
+      text-align: center;
+      padding: 60px 40px;
+      background: linear-gradient(135deg, #E8F9E8 0%, #FFF9C4 100%);
+    }
+
+    .success-screen.active {
+      display: block;
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .success-icon {
+      width: 96px;
+      height: 96px;
+      background: linear-gradient(135deg, var(--green-primary) 0%, #46A302 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px auto;
+      box-shadow: 0 8px 24px rgba(88, 204, 2, 0.4);
+      animation: successPop 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes successPop {
+      0% {
+        transform: scale(0);
+        rotate: 0deg;
+      }
+      50% {
+        transform: scale(1.2);
+        rotate: 180deg;
+      }
+      100% {
+        transform: scale(1);
+        rotate: 360deg;
+      }
+    }
+
+    .success-icon svg {
+      width: 56px;
+      height: 56px;
+      stroke: white;
+      fill: none;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-screen h2 {
+      font-size: 32px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--green-primary) 0%, var(--blue-primary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .success-screen p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 36px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .continue-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: linear-gradient(135deg, var(--blue-primary) 0%, #1890D6 100%);
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      border-radius: 20px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 6px 0 #1890D6;
+      position: relative;
+      top: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .continue-button svg {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+    }
+
+    .continue-button:hover {
+      top: 2px;
+      box-shadow: 0 4px 0 #1890D6;
+      animation: bounce 0.6s ease infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .continue-button:hover svg {
+      transform: rotate(12deg) scale(1.2);
+    }
+
+    .continue-button:active {
+      top: 6px;
+      box-shadow: 0 0 0 #1890D6;
+    }
+
+    @media (max-width: 640px) {
+      .header-section {
+        padding: 20px 24px 12px 24px;
+      }
+
+      .content-section {
+        padding: 32px 24px;
+      }
+
+      .step[data-step="1"] .step-title {
+        font-size: 28px;
+        margin-left: -20px;
+      }
+
+      .progress-section {
+        padding: 20px 24px;
+      }
+
+      .navigation-section {
+        padding: 24px 24px;
+        flex-direction: column;
+      }
+
+      .btn-next,
+      .btn-start,
+      .btn-back {
+        width: 100%;
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Progress bar section -->
+    <div class="progress-section" id="progressSection">
+      <div class="progress-header">
+        <span class="progress-text">Before we begin</span>
+        <span class="progress-count" id="progressCount">Step 1 of 4</span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progressBar" style="width: 25%;"></div>
+      </div>
+    </div>
+
+    <!-- Header section -->
+    <div class="header-section visible" id="headerSection">
+      <h1>Before we begin...</h1>
+      <p>A few things worth knowing about using this chatbot</p>
+    </div>
+
+    <!-- Content section -->
+    <div class="content-section" id="contentSection">
+      <!-- Step 1 -->
+      <div class="step active" data-step="1">
+        <div class="step-header">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h2 class="step-title">This chatbot isn't a lawyer</h2>
+        </div>
+        <p class="step-description">
+          Think of this tool as a helpful guide, not as legal advice. It can point you in the right direction and share useful information, but it can't replace advice from a qualified professional.
+        </p>
+        <a href="#" class="step-link">Learn more about what this chatbot can do</a>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step" data-step="2">
+        <div class="step-header">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h2 class="step-title">Keep your personal details private</h2>
+        </div>
+        <p class="step-description">
+          We automatically try to remove identifying information, but our system isn't perfect. Avoid sharing specific business names, addresses, or anything else that could identify you or your situation.
+        </p>
+        <a href="#" class="step-link">Read our privacy and data handling policy</a>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step" data-step="3">
+        <div class="step-header">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h2 class="step-title">AI sometimes gets things wrong</h2>
+        </div>
+        <p class="step-description">
+          This chatbot does its best, but it can make mistakes or misunderstand your question. Always double-check any links or information it provides before relying on it.
+        </p>
+        <a href="#" class="step-link">Find out how the chatbot works</a>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step" data-step="4">
+        <div class="step-header">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div>
+          <h2 class="step-title">Your chat won't be saved</h2>
+        </div>
+        <p class="step-description">
+          Once you close this page or leave the website, your conversation disappears. If you need a record of what was discussed, download or save it before you go.
+        </p>
+        <a href="#" class="step-link">Learn about our data retention practices</a>
+      </div>
+    </div>
+
+    <!-- Navigation section -->
+    <div class="navigation-section" id="navigationSection">
+      <button class="nav-button btn-back" id="backButton" disabled>Back</button>
+      <button class="nav-button btn-next" id="nextButton">Next</button>
+      <button class="nav-button btn-start" id="startButton" style="display: none;">I understand, let's start</button>
+    </div>
+
+    <!-- Success screen -->
+    <div class="success-screen" id="successScreen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <h2>You're all set!</h2>
+      <p>Thanks for taking the time to read through that. Let's get started with your question.</p>
+      <button class="continue-button" id="continueButton">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        Start chatting
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    const headerSection = document.getElementById('headerSection');
+    const progressSection = document.getElementById('progressSection');
+    const contentSection = document.getElementById('contentSection');
+    const navigationSection = document.getElementById('navigationSection');
+    const successScreen = document.getElementById('successScreen');
+    
+    const backButton = document.getElementById('backButton');
+    const nextButton = document.getElementById('nextButton');
+    const startButton = document.getElementById('startButton');
+    
+    const progressCount = document.getElementById('progressCount');
+    const progressBar = document.getElementById('progressBar');
+    const steps = document.querySelectorAll('.step');
+
+    // Step-specific button text
+    const nextButtonText = {
+      1: "Understood, this isn't legal advice",
+      2: "I won't share identifying details",
+      3: "I'll verify the information",
+      4: "Got it, I'll save if needed"
+    };
+
+    // Initialise with first step visible
+    updateStep();
+
+    // Next button
+    nextButton.addEventListener('click', () => {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateStep();
+      }
+    });
+
+    // Back button
+    backButton.addEventListener('click', () => {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStep();
+      }
+    });
+
+    // Start button (final step)
+    startButton.addEventListener('click', () => {
+      progressSection.style.display = 'none';
+      contentSection.style.display = 'none';
+      navigationSection.style.display = 'none';
+      successScreen.classList.add('active');
+      
+      // In production, this would proceed to the chatbot
+      console.log('Disclaimer completed - proceeding to chatbot');
+    });
+
+    // Continue button (on success screen)
+    const continueButton = document.getElementById('continueButton');
+    continueButton.addEventListener('click', () => {
+      // In production, this would launch/open the chatbot interface
+      console.log('Launching chatbot...');
+      alert('Chatbot would start here! Replace this function with your chatbot launch code.');
+      
+      // Example: Redirect to chatbot page
+      // window.location.href = '/chat';
+      
+      // Example: Show chatbot widget
+      // document.getElementById('chatbot-widget').style.display = 'block';
+      
+      // Example: Call chatbot initialisation function
+      // initialiseChatbot();
+    });
+
+    function updateStep() {
+      // Update step visibility
+      steps.forEach(step => {
+        step.classList.remove('active');
+        if (parseInt(step.dataset.step) === currentStep) {
+          step.classList.add('active');
+        }
+      });
+
+      // Show/hide header section - only visible on first step
+      if (currentStep === 1) {
+        headerSection.classList.add('visible');
+      } else {
+        headerSection.classList.remove('visible');
+      }
+
+      // Update progress bar
+      const progressPercent = (currentStep / totalSteps) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+      progressCount.textContent = `Step ${currentStep} of ${totalSteps}`;
+
+      // Update button states
+      backButton.disabled = currentStep === 1;
+
+      // Update Next button text with acknowledgement
+      nextButton.textContent = nextButtonText[currentStep];
+
+      // Show start button on last step, hide next button
+      if (currentStep === totalSteps) {
+        nextButton.style.display = 'none';
+        startButton.style.display = 'block';
+      } else {
+        nextButton.style.display = 'block';
+        startButton.style.display = 'none';
+      }
+    }
+
+    // Prevent link default behaviour in demo
+    document.querySelectorAll('.step-link').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        // In production, these would link to actual documentation pages
+      });
+    });
+  </script>
+</body>
+</html>
