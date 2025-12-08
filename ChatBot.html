@@ -310,6 +310,18 @@
 
     // Boot
     if (window.TTLOG) TTLOG.push('chat_start');
+    // Compute time spent on disclaimer
+(() => {
+  try {
+    const t0 = Number(localStorage.getItem('tt_disc_start') || '');
+    if (t0) {
+      const seconds = Math.round((Date.now() - t0) / 1000);
+      if (window.TTLOG) TTLOG.push('disclaimer_complete', { seconds });
+      localStorage.removeItem('tt_disc_start');
+    }
+  } catch (_) {}
+})();
+
     window.addEventListener('beforeunload', ()=>{ if (window.TTLOG) TTLOG.push('chat_end'); });
     setSessionPill();
     resetConversation();
