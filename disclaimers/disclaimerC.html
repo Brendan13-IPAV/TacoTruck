@@ -736,8 +736,26 @@ function _accumulateStepTime(prevStep) {
    // Continue button — redirect to /TacoTruck/ChatBot.html
 const continueButton = document.getElementById('continueButton');
 continueButton.addEventListener('click', () => {
-  // Navigate immediately - steps are already logged
-  window.top.location.href = '/TacoTruck/ChatBot.html';
+  // Finalise timing one last time if we didn't already
+  if (typeof _accumulateStepTime === 'function' && typeof lastStep !== 'undefined' && lastStep !== null) {
+    _accumulateStepTime(lastStep);
+    lastStep = null;
+  }
+
+  // Safe sum with initial 0
+  const totalMs = Object.values(stepTimes).reduce((a, b) => a + b, 0);
+  const payload = { step_times: stepTimes, total_ms: totalMs };
+
+  if (window.TTLOG) {
+    try { TTLOG.push('disclaimer_step_times', payload); } catch (e) { console.warn(e); }
+  } else {
+    console.log('disclaimer_step_times', payload);
+  }
+
+  // Tiny delay so the event persists before navigation
+  setTimeout(() => {
+    window.top.location.href = '/TacoTruck/ChatBot.html';
+  }, 200);
 });
 
 
