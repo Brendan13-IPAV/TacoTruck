@@ -1,228 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="color-scheme" content="light dark" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
   <title>TacoTruck – ChatBot Prototype</title>
-  <style>
-    :root {
-      --bg: linear-gradient(135deg, #f8fafc 0%, #fff7ed 100%);
-      --border: rgba(2,6,23,0.08);
-      --ink: #0f172a;
-      --muted: #475569;
-      --accentA: #d97706;
-      --accentB: #c2410c;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100vh; background: var(--bg);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
-      color: var(--ink); padding: 24px;
-    }
-    .wrap { max-width: 800px; margin: 0 auto; }
-    .logo {
-      width: 56px; height: 56px; border-radius: 16px;
-      background: linear-gradient(135deg, var(--accentA), var(--accentB));
-      display: grid; place-items: center; color: #fff; font-weight: 700;
-      margin: 0 auto 12px;
-    }
-    h1 { margin: 0 0 6px; font-size: 32px; letter-spacing: -0.2px; }
-    .sub { color: var(--muted); margin: 0 0 16px; }
 
-    .card {
-      background: #fff; border: 1px solid var(--border);
-      border-radius: 16px; box-shadow: 0 10px 30px rgba(2,6,23,0.05);
-      overflow: hidden;
+  <!-- note qualtrix link is https://ipaustralia.au1.qualtrics.com/jfe/form/SV_6g5ub3M5I2WGnf8 -->
+
+  <!-- Accessibility / UX: high-contrast defaults, system fonts, reduced motion respect -->
+  <style>
+    :root{
+      --bg: #ffffff;
+      --bg-grad: linear-gradient(135deg,#f8fafc 0%, #fff7ed 100%);
+      --ink:#0f172a;
+      --muted:#475569;
+      --border: rgba(2,6,23,0.12);
+      --pill:#e2e8f0;
+      --accentA:#0ea5e9;
+      --accentB:#0284c7;
+      --cta:#0ea5e9;
+      --cta-contrast:#ffffff;
+      --danger:#b91c1c;
     }
-    .messages {
-      height: 480px; overflow-y: auto; padding: 16px;
-      background: linear-gradient(180deg,#fff 0%,rgba(248,250,252,0.6) 100%);
+    @media (prefers-color-scheme: dark){
+      :root{
+        --bg:#0b1220;
+        --bg-grad: linear-gradient(135deg,#0b1220 0%, #0f172a 100%);
+        --ink:#e5eef9;
+        --muted:#a3b2c7;
+        --border: rgba(229,238,249,0.14);
+        --pill:#1f2a3d;
+        --accentA:#38bdf8;
+        --accentB:#0ea5e9;
+        --cta:#38bdf8;
+        --cta-contrast:#0b1220;
+      }
     }
-    .row { display: flex; margin-bottom: 10px; }
-    .row.user { justify-content: flex-end; }
-    .bubble {
-      max-width: 85%; padding: 10px 14px; border-radius: 12px;
-      font-size: 14px; line-height: 1.6; white-space: pre-wrap;
-      border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(2,6,23,0.04);
-      background: #fff; color: var(--ink);
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
+      color:var(--ink);
+      background:var(--bg-grad);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
     }
-    .row.user .bubble {
-      border: none; box-shadow: none; color: #fff;
+
+    /* Layout */
+    header{
+      display:flex; align-items:center; gap:12px;
+      padding:12px 16px; border-bottom:1px solid var(--border);
+      background: color-mix(in oklab, var(--bg) 92%, transparent);
+    }
+    .brand{
+      display:grid; place-items:center; width:40px; height:40px; border-radius:12px;
+      background: linear-gradient(135deg, var(--accentA), var(--accentB));
+      color:#fff; font-weight:700; font-size:20px;
+    }
+    .headtext{display:flex; flex-direction:column}
+    .title{margin:0; font-size:18px; letter-spacing:-0.1px}
+    .subtitle{margin:0; font-size:13px; color:var(--muted)}
+    .session{
+      margin-left:auto; font-size:12px; padding:4px 10px; border-radius:999px;
+      background:var(--pill); color:var(--ink); white-space:nowrap;
+    }
+
+    main{
+      height:calc(100% - 57px);
+      display:flex; justify-content:center; align-items:stretch;
+      padding:12px;
+    }
+    .wrap{
+      width:min(960px,100%);
+      display:flex; flex-direction:column; gap:12px;
+    }
+
+    /* Card */
+    .card{
+      display:flex; flex-direction:column; min-height:0;
+      background: color-mix(in oklab, var(--bg) 96%, transparent);
+      border:1px solid var(--border); border-radius:14px;
+      box-shadow:0 10px 30px rgba(2,6,23,0.05);
+      overflow:hidden;
+    }
+
+    /* Messages */
+    .messages{
+      flex:1; min-height:260px; max-height:72vh;
+      overflow:auto; padding:14px;
+      background: color-mix(in oklab, var(--bg) 98%, transparent);
+    }
+    .row{display:flex; margin:8px 0}
+    .row.user{justify-content:flex-end}
+    .bubble{
+      max-width:85%; padding:10px 14px; border-radius:12px;
+      font-size:14px; line-height:1.6; white-space:pre-wrap;
+      border:1px solid var(--border);
+      background:var(--bg); color:var(--ink);
+    }
+    .row.user .bubble{
+      border:0; color:var(--cta-contrast);
       background: linear-gradient(135deg, var(--accentA), var(--accentB));
     }
-    .footer { border-top: 1px solid var(--border); padding: 12px; background: #fff; }
-    .controls { display: flex; gap: 8px; }
-    textarea {
-      flex: 1; resize: none; border: 1px solid #cbd5e1; border-radius: 10px;
-      padding: 10px 12px; outline: none; color: var(--ink);
+    .visually-hidden{
+      position:absolute !important; height:1px; width:1px;
+      overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; border:0; padding:0; margin:-1px;
     }
-    button {
-      padding: 10px 14px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer;
+
+    /* Footer controls */
+    .footer{border-top:1px solid var(--border); background:var(--bg); padding:12px}
+    .controls{display:flex; gap:10px; align-items:flex-start}
+    textarea{
+      flex:1; resize:none; border:1px solid var(--border); border-radius:10px;
+      padding:10px 12px; color:var(--ink); background:var(--bg);
     }
-    .send {
-      background: linear-gradient(135deg, var(--accentA), var(--accentB)); color: #fff;
+    textarea:focus{outline:3px solid color-mix(in oklab, var(--accentA) 25%, transparent)}
+    button{
+      border:0; border-radius:10px; padding:10px 14px; font-weight:600; cursor:pointer;
     }
-    .clear { background: #f1f5f9; color: #334155; }
-    .hint { margin-top: 6px; font-size: 12px; text-align: center; color: #64748b; }
-    .fineprint { margin-top: 14px; text-align: center; font-size: 12px; color: #475569; }
-    .spinner {
-      width: 16px; height: 16px; border: 2px solid #fb923c; border-top-color: transparent;
-      border-radius: 50%; animation: spin .9s linear infinite; margin-right: 8px;
+    .send{background:var(--cta); color:var(--cta-contrast)}
+    .secondary{background:var(--pill); color:var(--ink)}
+    .hint{margin-top:6px; font-size:12px; color:var(--muted); text-align:center}
+
+    /* Utility */
+    .actions-center{display:flex; justify-content:center; margin-top:8px}
+    .fineprint{margin:0; text-align:center; font-size:12px; color:var(--muted)}
+    .btn-link{
+      background:none; border:none; color:var(--accentB); text-decoration:underline; cursor:pointer;
+      padding:0 4px; font:inherit;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner{
+      width:16px; height:16px; border:2px solid currentColor; border-top-color:transparent;
+      border-radius:50%; animation: spin .9s linear infinite; margin-right:8px;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media (prefers-reduced-motion: reduce){ .spinner{animation:none} }
   </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="logo" aria-hidden="true">🌮</div>
-    <h1>TacoTruck ChatBot</h1>
-    <p class="sub">Australian IP question tester (prototype)</p>
+  <a href="#composer" class="visually-hidden">Skip to message composer</a>
 
-    <div class="card" role="region" aria-label="Chat window">
-      <div id="messages" class="messages"></div>
-
-      <div class="footer">
-        <div class="controls">
-          <textarea id="input" rows="2" placeholder="Ask about Australian patents, trade marks, copyright…"></textarea>
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <button id="send" class="send">Send</button>
-            <button id="clear" class="clear">Clear</button>
-          </div>
-        </div>
-        <div class="hint">Enter = send · Shift+Enter = new line</div>
-      </div>
+  <header role="banner" aria-label="Header">
+    <div class="brand" aria-hidden="true">🌮</div>
+    <div class="headtext">
+      <h1 class="title">TacoTruck ChatBot</h1>
+      <p class="subtitle">Australian IP question tester (prototype)</p>
     </div>
+    <span id="sessionPill" class="session" aria-label="Session ID"></span>
+  </header>
 
-    <p class="fineprint">Prototype only — provides general information, not legal advice.</p>
-    
-    <div style="text-align:center; margin-top:16px;">
-  <button id="surveyBtn"
-    style="padding:10px 16px;border-radius:10px;border:none;background:#0ea5e9;color:#fff;font-weight:600;cursor:pointer;">
-    Finish & take survey
-  </button>
-</div>
+  <main role="main">
+    <div class="wrap">
+      <section class="card" role="region" aria-label="Chat window">
+        <!-- live region for assistive tech; assistant messages announced politely -->
+        <div id="live" class="visually-hidden" aria-live="polite" aria-atomic="false"></div>
 
-    
-  </div>
+        <div id="messages" class="messages" tabindex="0"></div>
 
- <script>
-  async function getReplyDemo(userText) {
-    // replaced with live outline call:
-    const res = await fetch('https://<your-vercel-domain>/api/intent-outline', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ user_input: userText })
+        <div class="footer">
+          <div class="controls">
+            <label for="input" class="visually-hidden">Your message</label>
+            <textarea id="input" rows="2" placeholder="Ask about Australian patents, trade marks, copyright…" aria-label="Type your question"></textarea>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button id="send" class="send" aria-label="Send message">Send</button>
+              <button id="clear" class="secondary" aria-label="Clear conversation">Clear</button>
+            </div>
+          </div>
+          <div id="kbdHint" class="hint">Enter = send · Shift+Enter = new line</div>
+        </div>
+      </section>
+
+      <div class="actions-center">
+        <button id="surveyBtn" class="secondary" aria-label="Finish and take survey">Finish &amp; take survey</button>
+      </div>
+
+      <p class="fineprint" role="note">
+        Prototype only — provides general information, not legal advice.
+      </p>
+    </div>
+  </main>
+
+  <!-- Telemetry logger -->
+  <script src="tt-logger.js"></script>
+
+  <!-- Outline-only placeholder: replace or augment later with topic lookup / API -->
+  <script>
+    // ----- Outline endpoint placeholder (keep as-is for now) -----
+    async function getReplyDemo(userText) {
+      // Replace with your live outline call when ready (kept minimal per brief)
+      const res = await fetch('https://<your-vercel-domain>/api/intent-outline', {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ user_input: userText })
+      }).catch(()=>null);
+      if (!res) return 'No outline.';
+      try {
+        const data = await res.json();
+        return data.outline || 'No outline.';
+      } catch { return 'No outline.'; }
+    }
+
+    // ----- Minimal chat wiring with accessibility & logging -----
+    const messagesEl = document.getElementById('messages');
+    const liveEl = document.getElementById('live');
+    const inputEl = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const clearBtn = document.getElementById('clear');
+    const surveyBtn = document.getElementById('surveyBtn');
+    const sessionPill = document.getElementById('sessionPill');
+
+    function getSessionId(){
+      try { return (JSON.parse(localStorage.getItem('tt_logs')||'{}').session_id)||''; }
+      catch { return ''; }
+    }
+    function getDisc(){
+      try { return (JSON.parse(localStorage.getItem('tt_meta')||'{}').disc)||''; }
+      catch { return ''; }
+    }
+    function setSessionPill(){
+      const id = getSessionId();
+      const disc = getDisc();
+      sessionPill.textContent = id ? `Session: ${id}${disc?` • Disc: ${disc}`:''}` : '';
+    }
+
+    function addMessage(role, content, {announce=false} = {}){
+      const row = document.createElement('div');
+      row.className = 'row ' + (role==='user' ? 'user' : 'assistant');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      bubble.textContent = content;
+      row.appendChild(bubble);
+      messagesEl.appendChild(row);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      if (role === 'assistant' && announce){
+        // update polite live region for screen readers
+        liveEl.textContent = content;
+      }
+    }
+
+    function resetConversation(){
+      messagesEl.innerHTML = '';
+      addMessage(
+        'assistant',
+        "Hello! I'm here to help you test questions about Australian intellectual property law.\n\n" +
+        "I provide general information only — not legal advice. For advice about your situation, please consult a qualified legal professional.\n\n" +
+        "What would you like to know?",
+        {announce:true}
+      );
+      inputEl.value = '';
+      inputEl.focus();
+    }
+
+    async function send(){
+      const text = (inputEl.value||'').trim();
+      if (!text) return;
+
+      addMessage('user', text);
+      if (window.TTLOG) TTLOG.push('chat_user_turn', { text_len: text.length });
+
+      inputEl.value = '';
+      inputEl.focus();
+
+      // spinner bubble
+      const row = document.createElement('div');
+      row.className = 'row assistant';
+      row.innerHTML = '<div class="bubble" style="display:flex;align-items:center;"><span class="spinner" aria-hidden="true"></span>Thinking…</div>';
+      messagesEl.appendChild(row);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+
+      const t0 = performance.now();
+      try{
+        const reply = await getReplyDemo(text);
+        row.remove();
+        addMessage('assistant', reply, {announce:true});
+        if (window.TTLOG) TTLOG.push('chat_bot_turn', { rt_ms: Math.round(performance.now()-t0) });
+      }catch(err){
+        row.remove();
+        addMessage('assistant', 'Error: could not process your message.');
+        if (window.TTLOG) TTLOG.push('chat_error', { message: String(err) });
+      }
+    }
+
+    // Keyboard & controls
+    sendBtn.addEventListener('click', send);
+    clearBtn.addEventListener('click', () => { resetConversation(); if (window.TTLOG) TTLOG.push('chat_cleared'); });
+    inputEl.addEventListener('keydown', (e)=>{
+      if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); }
     });
-    const data = await res.json();
-    return data.outline || 'No outline.';
-  }
-</script>
-  <!-- Logger (kept at root; adjust path if needed) -->
-<script src="tt-logger.js"></script>
 
-<script>
-  // --- Minimal chat wiring + telemetry ---
-  const messagesEl = document.getElementById('messages');
-  const inputEl = document.getElementById('input');
-  const sendBtn = document.getElementById('send');
-  const clearBtn = document.getElementById('clear');
+    // Qualtrics hand-off (keeps your earlier behavior)
+    surveyBtn.addEventListener('click', ()=>{
+      const logs = JSON.parse(localStorage.getItem('tt_logs')||'{}');
+      const meta = JSON.parse(localStorage.getItem('tt_meta')||'{}');
+      const session = logs.session_id || '';
+      const disc = meta.disc || '';
+      const ts = new Date().toISOString();
 
-  function addMessage(role, content) {
-    const row = document.createElement('div');
-    row.className = 'row ' + (role === 'user' ? 'user' : 'assistant');
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.textContent = content;
-    row.appendChild(bubble);
-    messagesEl.appendChild(row);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
+      // (Optional explicit log) uncomment if you want a clear marker
+      // if (window.TTLOG) TTLOG.push('survey_redirect', { session, disc });
 
-  function resetConversation() {
-    messagesEl.innerHTML = '';
-    addMessage(
-      'assistant',
-      "Hello! I'm here to help you test questions about Australian intellectual property law.\n\n" +
-      "I provide general information only — not legal advice. For advice about your situation, please consult a qualified legal professional.\n\n" +
-      "What would you like to know?"
-    );
-    inputEl.value = '';
-    inputEl.focus();
-  }
+      const base = 'https://ipaustralia.au1.qualtrics.com/jfe/form/SV_6g5ub3M5I2WGnf8';
+      const url = `${base}?session_id=${encodeURIComponent(session)}&disc=${encodeURIComponent(disc)}&ts=${encodeURIComponent(ts)}`;
+      window.location.href = url;
+    });
 
-  async function send() {
-    const text = (inputEl.value || '').trim();
-    if (!text) return;
-
-    addMessage('user', text);
-    TTLOG && TTLOG.push('chat_user_turn', { text_len: text.length });
-
-    inputEl.value = '';
-    inputEl.focus();
-
-    // spinner bubble
-    const thinking = document.createElement('div');
-    thinking.className = 'row assistant';
-    thinking.innerHTML =
-      '<div class="bubble" style="display:flex;align-items:center;">' +
-      '<span class="spinner"></span>Thinking…</div>';
-    messagesEl.appendChild(thinking);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-
-    const t0 = performance.now();
-    try {
-      const reply = await getReplyDemo(text); // your existing function above
-      thinking.remove();
-      addMessage('assistant', reply);
-      TTLOG && TTLOG.push('chat_bot_turn', { rt_ms: Math.round(performance.now() - t0) });
-    } catch (e) {
-      thinking.remove();
-      addMessage('assistant', 'Error: could not process your message.');
-      TTLOG && TTLOG.push('chat_error', { message: String(e) });
-    }
-  }
-
-  // hook up UI
-  sendBtn.addEventListener('click', send);
-  clearBtn.addEventListener('click', () => {
+    // Boot
+    if (window.TTLOG) TTLOG.push('chat_start');
+    window.addEventListener('beforeunload', ()=>{ if (window.TTLOG) TTLOG.push('chat_end'); });
+    setSessionPill();
     resetConversation();
-    TTLOG && TTLOG.push('chat_cleared');
-  });
-  inputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      send();
-    }
-  });
-
-  // telemetry bookends
-  TTLOG && TTLOG.push('chat_start');
-  window.addEventListener('beforeunload', () => TTLOG && TTLOG.push('chat_end'));
-
-  // boot
-  resetConversation();
-
-  // --- Qualtrics redirect ---
-document.getElementById('surveyBtn').addEventListener('click', () => {
-  const logs = JSON.parse(localStorage.getItem('tt_logs') || '{}');
-  const meta = JSON.parse(localStorage.getItem('tt_meta') || '{}');
-
-  const session = logs.session_id || '';
-  const disc = meta.disc || '';
-  const ts = new Date().toISOString();
-
-  // Replace with your actual Qualtrics survey link
-  const base = 'https://ipaustralia.au1.qualtrics.com/jfe/form/SV_6g5ub3M5I2WGnf8';
-
-  const url = `${base}?session_id=${encodeURIComponent(session)}&disc=${encodeURIComponent(disc)}&ts=${encodeURIComponent(ts)}`;
-
-  window.location.href = url;
-});
-
-  
-</script>
-
+  </script>
 </body>
 </html>
+
+
+
 
 
