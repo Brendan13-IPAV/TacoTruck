@@ -282,6 +282,7 @@
   </style>
 </head>
 <body>
+                <script src="../tt-logger.js"></script>
   <div class="container">
     <!-- Progress bar section - now at top -->
     <div class="progress-section" id="progressSection">
@@ -483,8 +484,8 @@ continueButton.addEventListener('click', () => {
   const totalMs = Object.values(stepTimes).reduce((a, b) => a + b, 0);
   const payload = { step_times: stepTimes, total_ms: totalMs };
 
-  if (window.Logger && typeof Logger.log_event === 'function') {
-    try { Logger.log_event('disclaimer_step_times', payload); } catch (e) { console.warn(e); }
+if (window.TTLOG) {
+    try { TTLOG.push('disclaimer_step_times', payload); } catch (e) { console.warn(e); }
   } else {
     console.log('disclaimer_step_times', payload);
   }
