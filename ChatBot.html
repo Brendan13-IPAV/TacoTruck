@@ -25,6 +25,60 @@
       --danger:#b91c1c;
       
     }
+/* Two-column layout: left panel (tests), right chat */
+.layout {
+  height: calc(100% - 57px);
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .panel { order: -1; } /* panel above chat on mobile */
+}
+
+/* Left panel visual separation */
+.panel {
+  background: color-mix(in oklab, var(--bg) 94%, transparent);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px;
+}
+.panel-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+.panel-box {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: color-mix(in oklab, var(--pill) 30%, var(--bg));
+}
+.panel .muted { color: var(--muted); }
+.small { font-size: 12px; }
+
+/* Larger, clearer rating buttons */
+.rateBtn {
+  background: var(--pill);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+.rateBtn:hover {
+  background: color-mix(in oklab, var(--accentA) 15%, var(--pill));
+  transform: translateY(-2px);
+}
+.rateBtn:active { transform: translateY(0); }
+
+    
     .rateBtn {
   background: var(--pill);
   border: 1px solid var(--border);
@@ -178,18 +232,31 @@
     <span id="sessionPill" class="session" aria-label="Session ID"></span>
   </header>
 
-  <main role="main">
-    <div class="wrap">
-<div id="testStatus" style="display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px;flex-wrap:wrap">
-  <strong id="testCounter">Test 1 of 5</strong>
-  <span id="testHint" style="color:var(--muted)"></span>
-  <span id="suggestionWrap" style="display:none;color:var(--muted)">
-    • Try this topic:&nbsp;<em id="suggestionText" style="font-style:italic"></em>
-    <button id="insertSuggestion" class="secondary" style="margin-left:8px;padding:4px 8px;font-size:12px;">Insert</button>
-  </span>
-</div>
+<main role="main">
+  <div class="layout">
+    <!-- LEFT: test panel (separate from chat) -->
+    <aside class="panel" aria-label="Test instructions">
+      <div class="panel-section">
+        <div class="panel-title">Test progress</div>
+        <div id="testStatus" class="panel-box">
+          <strong id="testCounter">Test 1 of 5</strong>
+          <div id="testHint" class="muted"></div>
+        </div>
+      </div>
 
+      <div class="panel-section">
+        <div class="panel-title">Topic idea</div>
+        <div id="suggestionWrap" class="panel-box" style="display:none;">
+          <em id="suggestionText"></em>
+          <p class="muted small" style="margin:8px 0 0">
+            Write your own wording — do not copy this text.
+          </p>
+        </div>
+      </div>
+    </aside>
 
+    <!-- RIGHT: chat UI (unchanged) -->
+    <section class="wrap">
       <section class="card" role="region" aria-label="Chat window">
         <!-- live region for assistive tech; assistant messages announced politely -->
         <div id="live" class="visually-hidden" aria-live="polite" aria-atomic="false"></div>
@@ -209,17 +276,13 @@
         </div>
       </section>
 
-<div id="ratingRow" style="display:none;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
-  <span style="font-size:14px;color:var(--muted)">How well did the bot understand your intent?</span>
-
-  <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
-  <button class="rateBtn" data-rate="0" aria-label="Neutral">😐</button>
-  <button class="rateBtn" data-rate="1" aria-label="Good (thumbs up)">👍</button>
-
-  <button id="nextTest" class="send" style="display:none;font-size:14px;">Next test</button>
-</div>
-
-
+      <div id="ratingRow" style="display:none;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
+        <span style="font-size:14px;color:var(--muted)">How well did the bot understand your intent?</span>
+        <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
+        <button class="rateBtn" data-rate="0"  aria-label="Neutral">😐</button>
+        <button class="rateBtn" data-rate="1"  aria-label="Good (thumbs up)">👍</button>
+        <button id="nextTest" class="send" style="display:none;font-size:14px;">Next test</button>
+      </div>
 
       <div class="actions-center">
         <button id="surveyBtn" class="secondary" aria-label="Finish and take survey">Finish &amp; take survey</button>
@@ -228,8 +291,10 @@
       <p class="fineprint" role="note">
         Prototype only — provides general information, not legal advice.
       </p>
-    </div>
-  </main>
+    </section>
+  </div>
+</main>
+
 
   <!-- Telemetry logger -->
   <script src="tt-logger.js"></script>
@@ -255,7 +320,7 @@ let currentSuggestion = null;
 
 const suggestionWrap = document.getElementById('suggestionWrap');
 const suggestionText = document.getElementById('suggestionText');
-const insertSuggestionBtn = document.getElementById('insertSuggestion');
+
 
 async function loadTopics() {
   try {
@@ -275,7 +340,7 @@ function setRandomSuggestionForTest() {
   if (!TOPICS.length) { suggestionWrap.style.display = 'none'; return; }
   currentSuggestion = TOPICS[Math.floor(Math.random() * TOPICS.length)];
   suggestionText.textContent = currentSuggestion.suggestion;
-  suggestionWrap.style.display = 'inline';
+   suggestionWrap.style.display = 'block';
   if (window.TTLOG) {
     TTLOG.push('test_suggestion', {
       test_number: testIndex,
