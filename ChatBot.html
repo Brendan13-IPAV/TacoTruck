@@ -94,6 +94,15 @@
     </div>
 
     <p class="fineprint">Prototype only — provides general information, not legal advice.</p>
+    
+    <div style="text-align:center; margin-top:16px;">
+  <button id="surveyBtn"
+    style="padding:10px 16px;border-radius:10px;border:none;background:#0ea5e9;color:#fff;font-weight:600;cursor:pointer;">
+    Finish & take survey
+  </button>
+</div>
+
+    
   </div>
 
  <script>
@@ -192,6 +201,25 @@
 
   // boot
   resetConversation();
+
+  // --- Qualtrics redirect ---
+document.getElementById('surveyBtn').addEventListener('click', () => {
+  const logs = JSON.parse(localStorage.getItem('tt_logs') || '{}');
+  const meta = JSON.parse(localStorage.getItem('tt_meta') || '{}');
+
+  const session = logs.session_id || '';
+  const disc = meta.disc || '';
+  const ts = new Date().toISOString();
+
+  // Replace with your actual Qualtrics survey link
+  const base = 'https://ipaustralia.au1.qualtrics.com/jfe/form/SV_6g5ub3M5I2WGnf8';
+
+  const url = `${base}?session_id=${encodeURIComponent(session)}&disc=${encodeURIComponent(disc)}&ts=${encodeURIComponent(ts)}`;
+
+  window.location.href = url;
+});
+
+  
 </script>
 
 </body>
