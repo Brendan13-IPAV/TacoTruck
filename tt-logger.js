@@ -4,7 +4,7 @@
   const META_KEY = 'tt_meta';
 
   // ✅ Add your Apps Script Web App URL here (ends with /exec). Keep placeholder if you don't have it yet.
-  const SHEET_URL = 'https://script.google.com/macros/s/REPLACE_WITH_YOURS/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwwLkY7NLbpzMfsOIFcKaed-Gcn619vDT7HpiKXtWUuHfH_h9KPU3OO1exfdTv3sw/exec';
 
   function postToSheet(ev) {
   // If not configured yet, do nothing (safe while you wait for access)
