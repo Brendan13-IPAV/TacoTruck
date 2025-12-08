@@ -88,4 +88,6 @@ push(type, data = {}) {
   if (params.get('export') === 'csv') window.TTLOG.exportCSV();
 
   window.TTLOG.push('page_view', { path: location.pathname + location.search });
+  window.TTLOG.push('env', { ua: navigator.userAgent });
+
 })();
