@@ -23,6 +23,7 @@
       --cta:#0ea5e9;
       --cta-contrast:#ffffff;
       --danger:#b91c1c;
+      
     }
     .rateBtn {
   background: var(--pill);
@@ -33,6 +34,7 @@
   cursor: pointer;
   transition: background 0.2s, transform 0.2s;
 }
+    
 
 .rateBtn:hover {
   background: color-mix(in oklab, var(--accentA) 15%, var(--pill));
@@ -57,6 +59,10 @@
         --cta-contrast:#0b1220;
       }
     }
+
+    #insertSuggestion { border:1px solid var(--border); }
+#insertSuggestion:hover { filter: brightness(0.98); }
+
 
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -174,10 +180,15 @@
 
   <main role="main">
     <div class="wrap">
-      <div id="testStatus" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px;">
+<div id="testStatus" style="display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px;flex-wrap:wrap">
   <strong id="testCounter">Test 1 of 5</strong>
   <span id="testHint" style="color:var(--muted)"></span>
+  <span id="suggestionWrap" style="display:none;color:var(--muted)">
+    • Try this topic:&nbsp;<em id="suggestionText" style="font-style:italic"></em>
+    <button id="insertSuggestion" class="secondary" style="margin-left:8px;padding:4px 8px;font-size:12px;">Insert</button>
+  </span>
 </div>
+
 
       <section class="card" role="region" aria-label="Chat window">
         <!-- live region for assistive tech; assistant messages announced politely -->
@@ -238,6 +249,50 @@
         return data.outline || 'No outline.';
       } catch { return 'No outline.'; }
     }
+// ---- Topic suggestions (loaded from /data/topics.json) ----
+let TOPICS = [];
+let currentSuggestion = null;
+
+const suggestionWrap = document.getElementById('suggestionWrap');
+const suggestionText = document.getElementById('suggestionText');
+const insertSuggestionBtn = document.getElementById('insertSuggestion');
+
+async function loadTopics() {
+  try {
+    const res = await fetch('data/topics.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('topics fetch failed');
+    TOPICS = await res.json();
+  } catch {
+    // Fallback if file missing or blocked
+    TOPICS = [
+      { intent:'IP_Costs', category:'Costs & Timing', suggestion:'Ask about the expected cost to apply for a trade mark in Australia.' }
+    ];
+  }
+}
+
+// Pick and show a random suggestion for the current test
+function setRandomSuggestionForTest() {
+  if (!TOPICS.length) { suggestionWrap.style.display = 'none'; return; }
+  currentSuggestion = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+  suggestionText.textContent = currentSuggestion.suggestion;
+  suggestionWrap.style.display = 'inline';
+  if (window.TTLOG) {
+    TTLOG.push('test_suggestion', {
+      test_number: testIndex,
+      intent: currentSuggestion.intent,
+      category: currentSuggestion.category
+    });
+  }
+}
+
+// Insert suggestion text into the composer
+insertSuggestionBtn.addEventListener('click', () => {
+  if (!currentSuggestion) return;
+  inputEl.value = currentSuggestion.suggestion;
+  inputEl.focus();
+});
+
+    
 // ----- Test loop state -----
 const TOTAL_TESTS = 5;
 let testIndex = 1;
@@ -266,6 +321,9 @@ function setupTest() {
   nextTestBtn.style.display = 'none';
   if (window.TTLOG) TTLOG.push('test_setup', { test_number: testIndex });
   resetConversation();
+
+  // NEW: display a random suggestion for this test
+    setRandomSuggestionForTest();
 }
 
 // After at least one user → bot exchange, show the rating
@@ -428,7 +486,8 @@ nextTestBtn.addEventListener('click', () => {
 
     window.addEventListener('beforeunload', ()=>{ if (window.TTLOG) TTLOG.push('chat_end'); });
     setSessionPill();
- setupTest();
+    loadTopics().then(() => setupTest());
+
   </script>
 </body>
 </html>
