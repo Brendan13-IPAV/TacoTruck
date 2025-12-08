@@ -527,6 +527,7 @@
   </style>
 </head>
 <body>
+    <script src="../tt-logger.js"></script>
   <div class="container">
     <!-- Progress bar section -->
     <div class="progress-section" id="progressSection">
@@ -684,9 +685,17 @@ function _accumulateStepTime(prevStep) {
     // Initialise with first step visible
     updateStep();
 
-    // Next button
+// Next button
     nextButton.addEventListener('click', () => {
       if (currentStep < totalSteps) {
+        // Log the step that was just completed
+        if (window.TTLOG) {
+          const elapsed = Date.now() - stepStartTime;
+          TTLOG.push('disclaimer_step_complete', {
+            step: currentStep,
+            duration_ms: elapsed
+          });
+        }
         currentStep++;
         updateStep();
       }
@@ -701,7 +710,18 @@ function _accumulateStepTime(prevStep) {
     });
 
     // Start button (final step)
+// Start button (final step)
     startButton.addEventListener('click', () => {
+      // Log the final step completion
+      if (window.TTLOG) {
+        const elapsed = Date.now() - stepStartTime;
+        TTLOG.push('disclaimer_step_complete', {
+          step: currentStep,
+          duration_ms: elapsed
+        });
+      }
+      
+      // Hide sections and show success
       // Hide main sections and show success screen
       progressSection.style.display = 'none';
       contentSection.style.display = 'none';
