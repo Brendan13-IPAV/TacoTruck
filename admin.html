@@ -5,16 +5,35 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>TacoTruck – Admin</title>
   <style>
-    body{margin:0;padding:24px;font:14px system-ui,Segoe UI,Roboto,Inter,Arial;background:#f8fafc;color:#0f172a}
+    :root{
+      --bg:#f8fafc; --fg:#0f172a; --muted:#64748b;
+      --card:#ffffff; --stroke:#e2e8f0; --stroke2:#eef2f7; --accent:#0ea5e9; --pill:#e2e8f0;
+      --ok:#16a34a; --warn:#f59e0b;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;padding:24px;font:14px system-ui,Segoe UI,Roboto,Inter,Arial;background:var(--bg);color:var(--fg)}
     h1{margin:0 0 12px}
+    h3{margin:20px 0 8px}
     .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-    button{padding:10px 14px;border:0;border-radius:8px;background:#0ea5e9;color:#fff;font-weight:600;cursor:pointer}
-    button.ghost{background:#e2e8f0;color:#0f172a}
-    table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
-    th,td{padding:8px 10px;border-bottom:1px solid #eef2f7;text-align:left;font-size:13px}
+    button{padding:10px 14px;border:0;border-radius:8px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer}
+    button.ghost{background:var(--pill);color:var(--fg)}
+    table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--stroke);border-radius:8px;overflow:hidden}
+    th,td{padding:8px 10px;border-bottom:1px solid var(--stroke2);text-align:left;font-size:13px;vertical-align:top}
     th{background:#f1f5f9}
-    .pill{background:#e2e8f0;border-radius:999px;padding:4px 10px;margin-left:6px}
-    pre{white-space:pre-wrap;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:12px;max-height:40vh;overflow:auto}
+    .pill{background:var(--pill);border-radius:999px;padding:4px 10px;margin-left:6px}
+    .muted{color:var(--muted)}
+    pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--stroke);border-radius:8px;padding:12px;max-height:40vh;overflow:auto}
+
+    /* Disclaimer timing block */
+    .timing{display:grid;grid-template-columns:120px 1fr auto;gap:8px;align-items:center}
+    .bar{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden}
+    .bar > span{display:block;height:100%;background:linear-gradient(90deg,#60a5fa,#22d3ee);width:0}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#e2e8f0;font-size:12px}
+    .badge.ok{background:#dcfce7;color:#14532d}
+    .badge.warn{background:#fef3c7;color:#78350f}
+    .nowrap{white-space:nowrap}
+    .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .truncate{max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   </style>
 </head>
 <body>
@@ -29,9 +48,22 @@
   <h3>Summary</h3>
   <table id="summary"><tbody></tbody></table>
 
+  <h3>Disclaimer timing (latest)</h3>
+  <table id="timing">
+    <thead><tr><th>Variant</th><th>Per-step</th><th class="nowrap">Total</th></tr></thead>
+    <tbody></tbody>
+  </table>
+
   <h3>Last 10 events</h3>
   <table id="events">
-    <thead><tr><th>ts</th><th>type</th><th>disc</th><th>detail</th></tr></thead>
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Type</th>
+        <th>Disc</th>
+        <th>Detail</th>
+      </tr>
+    </thead>
     <tbody></tbody>
   </table>
 
@@ -40,40 +72,166 @@
 
   <script src="tt-logger.js"></script>
   <script>
+    // --- helpers ---
+    const fmt = (x) => typeof x==='string' ? x : JSON.stringify(x);
     function getLogs(){ try { return JSON.parse(localStorage.getItem('tt_logs')||'{}'); } catch { return {}; } }
     function getMeta(){ try { return JSON.parse(localStorage.getItem('tt_meta')||'{}'); } catch { return {}; } }
-    function fmt(x){ return typeof x==='string' ? x : JSON.stringify(x); }
+    const safeArr = (a) => Array.isArray(a) ? a : [];
 
+    function prettyTs(ts){
+      // accept ISO strings or epoch
+      try {
+        const d = typeof ts==='number' ? new Date(ts) : new Date(String(ts));
+        if (isNaN(d.getTime())) return ts || '—';
+        // local time, short
+        return d.toLocaleString();
+      } catch { return ts || '—'; }
+    }
+    function msToStr(ms){
+      if (!Number.isFinite(ms)) return '—';
+      if (ms<1000) return ms+' ms';
+      const s = ms/1000;
+      if (s<60) return s.toFixed(1)+' s';
+      const m = Math.floor(s/60);
+      const r = (s%60).toFixed(0);
+      return `${m}m ${r}s`;
+    }
+
+    function lastDisclaimerTiming(events){
+      // find last event with type === 'disclaimer_step_times'
+      for (let i = events.length - 1; i >= 0; i--){
+        if (events[i] && events[i].type === 'disclaimer_step_times') return events[i];
+      }
+      return null;
+    }
+
+    function renderTimingRow(tbody, metaDisc, timingEvt){
+      const disc = timingEvt?.disc || metaDisc || '(unknown)';
+      const stepTimes = (timingEvt && timingEvt.step_times) || {};
+      const total = Number(timingEvt?.total_ms) || Object.values(stepTimes).reduce((a,b)=>a+(+b||0),0);
+      const max = Math.max(1, ...Object.values(stepTimes).map(x=>+x||0)); // avoid /0
+      const badgeClass = total >= 60000 ? 'warn' : 'ok'; // 60s+ warns
+
+      const tr = document.createElement('tr');
+
+      // Variant cell
+      const tdDisc = document.createElement('td');
+      tdDisc.innerHTML = `<span class="badge ${badgeClass}">Disc ${disc}</span>`;
+      tr.appendChild(tdDisc);
+
+      // Per-step cell
+      const tdSteps = document.createElement('td');
+      if (Object.keys(stepTimes).length === 0){
+        tdSteps.innerHTML = '<span class="muted">No timing payload found.</span>';
+      } else {
+        // Build a tiny list with bars
+        const container = document.createElement('div');
+        for (const stepKey of Object.keys(stepTimes).sort((a,b)=>+a-+b)){
+          const ms = +stepTimes[stepKey] || 0;
+          const pct = Math.max(2, Math.round((ms/max)*100));
+          const row = document.createElement('div');
+          row.className = 'timing';
+          row.innerHTML = `
+            <div class="mono">Step ${stepKey}</div>
+            <div class="bar" title="${ms} ms"><span style="width:${pct}%"></span></div>
+            <div class="nowrap mono">${msToStr(ms)}</div>
+          `;
+          container.appendChild(row);
+        }
+        tdSteps.appendChild(container);
+      }
+      tr.appendChild(tdSteps);
+
+      // Total cell
+      const tdTotal = document.createElement('td');
+      tdTotal.innerHTML = `<strong>${msToStr(total)}</strong>`;
+      tr.appendChild(tdTotal);
+
+      tbody.appendChild(tr);
+    }
+
+    // --- main render ---
     function render(){
       const s = getLogs();
       const m = getMeta();
+      const events = safeArr(s.events);
+
+      // Session pill
       document.getElementById('session').textContent = s.session_id || '(none)';
 
+      // Summary
       const sum = document.querySelector('#summary tbody');
       sum.innerHTML = '';
       [
         ['Session ID', s.session_id || '—'],
-        ['Started at', s.started_at || '—'],
-        ['Events', (s.events||[]).length],
-        ['Disclaimer', m.disc || '(unknown)'],
+        ['Started at', prettyTs(s.started_at) || '—'],
+        ['Events', events.length],
+        ['Disclaimer variant', m.disc || '(unknown)'],
       ].forEach(([k,v])=>{
         const tr=document.createElement('tr');
         tr.innerHTML = `<th>${k}</th><td>${fmt(v)}</td>`;
         sum.appendChild(tr);
       });
 
+      // Disclaimer timing (latest)
+      const timingBody = document.querySelector('#timing tbody');
+      timingBody.innerHTML = '';
+      const timingEvt = lastDisclaimerTiming(events);
+      if (timingEvt){
+        renderTimingRow(timingBody, m.disc, timingEvt);
+      } else {
+        const tr=document.createElement('tr');
+        tr.innerHTML = `<td colspan="3" class="muted">No <code>disclaimer_step_times</code> event found for this session yet.</td>`;
+        timingBody.appendChild(tr);
+      }
+
+      // Last 10 events (pretty)
       const evBody = document.querySelector('#events tbody');
       evBody.innerHTML = '';
-      (s.events||[]).slice(-10).reverse().forEach(e=>{
+      events.slice(-10).reverse().forEach(e=>{
         const tr=document.createElement('tr');
-        tr.innerHTML = `<td>${e.ts}</td><td>${e.type}</td><td>${e.disc??''}</td><td>${fmt(e).slice(0,160)}</td>`;
+
+        // When
+        const tdWhen = document.createElement('td');
+        tdWhen.innerHTML = `${prettyTs(e.ts)}<div class="muted mono">${e.ts ?? ''}</div>`;
+        tr.appendChild(tdWhen);
+
+        // Type
+        const tdType = document.createElement('td');
+        tdType.textContent = e.type || '';
+        tr.appendChild(tdType);
+
+        // Disc
+        const tdDisc = document.createElement('td');
+        tdDisc.textContent = e.disc ?? '';
+        tr.appendChild(tdDisc);
+
+        // Detail (compact)
+        const tdDet = document.createElement('td');
+        // Show a concise slice of useful keys without dumping everything
+        const keysToShow = ['path','test_number','intent','category','rating','seconds','rt_ms','total_ms'];
+        const parts = [];
+        keysToShow.forEach(k=>{
+          if (e[k] !== undefined) parts.push(`<span class="mono">${k}</span>: ${fmt(e[k])}`);
+        });
+        // If it's a disclaimer timing payload, indicate steps count
+        if (e.type === 'disclaimer_step_times' && e.step_times){
+          const stepCount = Object.keys(e.step_times).length;
+          parts.push(`<span class="mono">steps</span>: ${stepCount}`);
+        }
+        const compact = parts.join(' · ');
+        tdDet.innerHTML = compact ? `<div class="truncate" title='${fmt(e)}'>${compact}</div>` : `<span class="muted">—</span>`;
+        tr.appendChild(tdDet);
+
         evBody.appendChild(tr);
       });
 
+      // Raw (truncated)
       const raw = JSON.stringify(s);
       document.getElementById('raw').textContent = raw.length>5000 ? raw.slice(0,5000)+' …(truncated)' : raw;
     }
 
+    // Buttons
     document.getElementById('download').onclick = () => TTLOG.exportCSV();
     document.getElementById('reset').onclick = () => { localStorage.removeItem('tt_logs'); render(); };
     document.getElementById('refresh').onclick = render;
