@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chatbot disclaimer - Sequential version</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     /* Formal neutral colour scheme */
     :root {
@@ -91,9 +87,7 @@
       display: none;
     }
 
-    .header-section.visible {
-      display: block;
-    }
+    .header-section.visible { display: block; }
 
     .header-section h1 {
       font-size: 16px;
@@ -110,21 +104,12 @@
     }
 
     /* Content section */
-    .content-section {
-      padding: 40px;
-    }
+    .content-section { padding: 40px; }
 
-    .step {
-      display: none;
-    }
+    .step { display: none; }
+    .step.active { display: block; }
 
-    .step.active {
-      display: block;
-    }
-
-    .step-header {
-      margin-bottom: 24px;
-    }
+    .step-header { margin-bottom: 24px; }
 
     .step-icon {
       width: 48px;
@@ -182,15 +167,8 @@
       align-items: center;
       gap: 6px;
     }
-
-    .step-link:hover {
-      color: var(--text-secondary);
-    }
-
-    .step-link::after {
-      content: '→';
-      font-size: 16px;
-    }
+    .step-link:hover { color: var(--text-secondary); }
+    .step-link::after { content: '→'; font-size: 16px; }
 
     /* Navigation section */
     .navigation-section {
@@ -215,37 +193,24 @@
       color: var(--text-primary);
     }
 
-    .btn-next {
-      min-width: 240px;
-    }
+    .btn-next { min-width: 240px; }
 
     .btn-back:hover:not(:disabled) {
       border-color: var(--text-primary);
       background-color: var(--bg-light);
     }
+    .btn-back:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .btn-back:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .btn-next,
-    .btn-start {
+    .btn-next, .btn-start {
       background-color: var(--text-primary);
       color: white;
       border: 1px solid var(--text-primary);
     }
-
-    .btn-next:hover,
-    .btn-start:hover {
+    .btn-next:hover, .btn-start:hover {
       background-color: var(--text-secondary);
       border-color: var(--text-secondary);
     }
-
-    .btn-start {
-      min-width: 200px;
-      margin-left: auto;
-    }
+    .btn-start { min-width: 200px; margin-left: auto; }
 
     /* Success screen */
     .success-screen {
@@ -253,10 +218,7 @@
       text-align: center;
       padding: 60px 40px;
     }
-
-    .success-screen.active {
-      display: block;
-    }
+    .success-screen.active { display: block; }
 
     .success-icon {
       width: 64px;
@@ -268,7 +230,6 @@
       justify-content: center;
       margin: 0 auto 24px auto;
     }
-
     .success-icon svg {
       width: 40px;
       height: 40px;
@@ -285,7 +246,6 @@
       color: var(--text-primary);
       margin-bottom: 12px;
     }
-
     .success-screen p {
       font-size: 16px;
       color: var(--text-secondary);
@@ -306,38 +266,18 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-
-    .continue-button svg {
-      width: 20px;
-      height: 20px;
-    }
-
+    .continue-button svg { width: 20px; height: 20px; }
     .continue-button:hover {
       background-color: var(--text-secondary);
       border-color: var(--text-secondary);
     }
 
     @media (max-width: 640px) {
-      .header-section {
-        padding: 20px 24px 12px 24px;
-      }
-
-      .header-section h1 {
-        font-size: 15px;
-      }
-
-      .header-section p {
-        font-size: 12px;
-      }
-
-      .content-section {
-        padding: 32px 24px;
-      }
-
-      .step[data-step="1"] .step-title {
-        font-size: 28px;
-        margin-left: -20px;
-      }
+      .header-section { padding: 20px 24px 12px 24px; }
+      .header-section h1 { font-size: 15px; }
+      .header-section p { font-size: 12px; }
+      .content-section { padding: 32px 24px; }
+      .step[data-step="1"] .step-title { font-size: 28px; margin-left: -20px; }
     }
   </style>
 </head>
@@ -504,22 +444,22 @@
 
     // Start button (final step)
     startButton.addEventListener('click', () => {
+      // Hide main sections and show success screen
       progressSection.style.display = 'none';
       contentSection.style.display = 'none';
       navigationSection.style.display = 'none';
       successScreen.classList.add('active');
       
-      // In production, this would proceed to the chatbot
+      // Log completion as in your original
       console.log('Disclaimer completed - proceeding to chatbot');
     });
 
-    // Continue button (on success screen)
-const continueButton = document.getElementById('continueButton');
-
-continueButton.addEventListener('click', () => {
-  window.top.location.href = '../ChatBot.html';
-});
-
+    // Continue button — Option A: redirect to root /ChatBot.html
+    const continueButton = document.getElementById('continueButton');
+    continueButton.addEventListener('click', () => {
+      // Absolute path so it resolves to repo/site root
+      window.top.location.href = '/ChatBot.html';
+    });
 
     function updateStep() {
       // Update step visibility
@@ -558,7 +498,7 @@ continueButton.addEventListener('click', () => {
       }
     }
 
-    // Prevent link default behavior in demo
+    // Prevent link default behavior in demo (kept from your version)
     document.querySelectorAll('.step-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
