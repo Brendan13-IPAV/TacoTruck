@@ -155,6 +155,11 @@
 
   <main role="main">
     <div class="wrap">
+      <div id="testStatus" style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px;">
+  <strong id="testCounter">Test 1 of 5</strong>
+  <span id="testHint" style="color:var(--muted)"></span>
+</div>
+
       <section class="card" role="region" aria-label="Chat window">
         <!-- live region for assistive tech; assistant messages announced politely -->
         <div id="live" class="visually-hidden" aria-live="polite" aria-atomic="false"></div>
@@ -173,6 +178,15 @@
           <div id="kbdHint" class="hint">Enter = send · Shift+Enter = new line</div>
         </div>
       </section>
+
+      <div id="ratingRow" style="display:none;gap:10px;justify-content:center;align-items:center;">
+  <span style="font-size:13px;color:var(--muted)">Rate how well the bot understood your intent:</span>
+  <button class="secondary" data-rate="-1" aria-label="Bad (−1)">−1</button>
+  <button class="secondary" data-rate="0"  aria-label="Neutral (0)">0</button>
+  <button class="secondary" data-rate="1"  aria-label="Good (+1)">+1</button>
+  <button id="nextTest" class="send" style="display:none;">Next test</button>
+</div>
+
 
       <div class="actions-center">
         <button id="surveyBtn" class="secondary" aria-label="Finish and take survey">Finish &amp; take survey</button>
@@ -202,6 +216,67 @@
         return data.outline || 'No outline.';
       } catch { return 'No outline.'; }
     }
+// ----- Test loop state -----
+const TOTAL_TESTS = 5;
+let testIndex = 1;
+let turnsThisTest = 0;
+
+// Optional: prompts you plan to show per test (leave blank if you don't want hints)
+const TEST_HINTS = [
+  "Try a cost/timing style question",
+  "Ask about renewal/expiry",
+  "Ask about takedowns/enforcement",
+  "Ask about differences between IP rights",
+  "Ask about international scope"
+];
+
+const testCounterEl = document.getElementById('testCounter');
+const testHintEl = document.getElementById('testHint');
+const ratingRow = document.getElementById('ratingRow');
+const nextTestBtn = document.getElementById('nextTest');
+
+// Prepare the UI for a given test
+function setupTest() {
+  testCounterEl.textContent = `Test ${testIndex} of ${TOTAL_TESTS}`;
+  testHintEl.textContent = TEST_HINTS[testIndex - 1] ? `• ${TEST_HINTS[testIndex - 1]}` : '';
+  turnsThisTest = 0;
+  ratingRow.style.display = 'none';
+  nextTestBtn.style.display = 'none';
+  if (window.TTLOG) TTLOG.push('test_setup', { test_number: testIndex });
+  resetConversation();
+}
+
+// After at least one user → bot exchange, show the rating
+function maybeShowRating() {
+  if (turnsThisTest > 0) {
+    ratingRow.style.display = 'flex';
+  }
+}
+
+// Handle rating click (+1 / 0 / −1)
+ratingRow.addEventListener('click', (e) => {
+  const v = e.target?.getAttribute?.('data-rate');
+  if (v === null || v === undefined) return;
+  const val = Number(v);
+  if (window.TTLOG) TTLOG.push('test_rating', { test_number: testIndex, rating: val });
+
+  // Show "Next test" button after rating
+  nextTestBtn.style.display = 'inline-block';
+});
+
+// Advance to next test or finish
+nextTestBtn.addEventListener('click', () => {
+  if (window.TTLOG) TTLOG.push('test_completed', { test_number: testIndex, turns: turnsThisTest });
+  testIndex += 1;
+  if (testIndex > TOTAL_TESTS) {
+    if (window.TTLOG) TTLOG.push('tests_all_completed', { total: TOTAL_TESTS });
+    // After finishing, you can auto-open the survey or simply hide the rating row
+    ratingRow.style.display = 'none';
+    // (leave user to click your existing "Finish & take survey" button)
+  } else {
+    setupTest();
+  }
+});
 
     // ----- Minimal chat wiring with accessibility & logging -----
     const messagesEl = document.getElementById('messages');
@@ -255,35 +330,41 @@
       inputEl.focus();
     }
 
-    async function send(){
-      const text = (inputEl.value||'').trim();
-      if (!text) return;
+   async function send(){
+  const text = (inputEl.value||'').trim();
+  if (!text) return;
 
-      addMessage('user', text);
-      if (window.TTLOG) TTLOG.push('chat_user_turn', { text_len: text.length });
+  addMessage('user', text);
+  if (window.TTLOG) TTLOG.push('chat_user_turn', { text_len: text.length, test_number: testIndex });
 
-      inputEl.value = '';
-      inputEl.focus();
+  inputEl.value = '';
+  inputEl.focus();
 
-      // spinner bubble
-      const row = document.createElement('div');
-      row.className = 'row assistant';
-      row.innerHTML = '<div class="bubble" style="display:flex;align-items:center;"><span class="spinner" aria-hidden="true"></span>Thinking…</div>';
-      messagesEl.appendChild(row);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
+  const row = document.createElement('div');
+  row.className = 'row assistant';
+  row.innerHTML = '<div class="bubble" style="display:flex;align-items:center;"><span class="spinner" aria-hidden="true"></span>Thinking…</div>';
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 
-      const t0 = performance.now();
-      try{
-        const reply = await getReplyDemo(text);
-        row.remove();
-        addMessage('assistant', reply, {announce:true});
-        if (window.TTLOG) TTLOG.push('chat_bot_turn', { rt_ms: Math.round(performance.now()-t0) });
-      }catch(err){
-        row.remove();
-        addMessage('assistant', 'Error: could not process your message.');
-        if (window.TTLOG) TTLOG.push('chat_error', { message: String(err) });
-      }
-    }
+  const t0 = performance.now();
+  try{
+    const reply = await getReplyDemo(text);
+    row.remove();
+    addMessage('assistant', reply, {announce:true});
+    const rt = Math.round(performance.now()-t0);
+    if (window.TTLOG) TTLOG.push('chat_bot_turn', { rt_ms: rt, test_number: testIndex });
+
+    // Count a completed exchange on this test
+    turnsThisTest += 1;
+    maybeShowRating();
+
+  }catch(err){
+    row.remove();
+    addMessage('assistant', 'Error: could not process your message.');
+    if (window.TTLOG) TTLOG.push('chat_error', { message: String(err), test_number: testIndex });
+  }
+}
+
 
     // Keyboard & controls
     sendBtn.addEventListener('click', send);
@@ -324,7 +405,7 @@
 
     window.addEventListener('beforeunload', ()=>{ if (window.TTLOG) TTLOG.push('chat_end'); });
     setSessionPill();
-    resetConversation();
+ setupTest();
   </script>
 </body>
 </html>
