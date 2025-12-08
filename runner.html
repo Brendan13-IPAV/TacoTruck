@@ -83,8 +83,20 @@ localStorage.setItem('tt_meta', JSON.stringify({ disc: chosen.id }));
         return;
         localStorage.setItem('tt_meta', JSON.stringify({ disc: chosen.id }));
       }
+
+      
       // Load the disclaimer; it owns the interaction and can navigate to ChatBot.html itself
       frame.src = chosen.url;
+
+      <script>
+frame.addEventListener('load', () => {
+  try {
+    localStorage.setItem('tt_disc_start', String(Date.now()));
+    if (window.TTLOG) TTLOG.push('disclaimer_start', { version: chosen.id });
+  } catch (_) {}
+});
+</script>
+
     })();
 
     // Optional: if your disclaimers want to signal completion, support postMessage:
