@@ -415,6 +415,21 @@
     const progressBar = document.getElementById('progressBar');
     const steps = document.querySelectorAll('.step');
 
+    // --- Minimal per-step timing ---
+let stepStartTime = Date.now();
+let lastStep = null;
+const stepTimes = {}; // e.g., {1: 1234, 2: 4567}
+
+function _accumulateStepTime(prevStep) {
+  if (!prevStep) return;
+  const now = Date.now();
+  const elapsed = now - stepStartTime;
+  stepTimes[prevStep] = (stepTimes[prevStep] || 0) + elapsed;
+  stepStartTime = now;
+}
+// --- End timing block ---
+
+
     // Step-specific button text
     const nextButtonText = {
       1: "I understand this is general information only",
@@ -457,11 +472,32 @@
     // Continue button — Option A: redirect to root /ChatBot.html
     const continueButton = document.getElementById('continueButton');
     continueButton.addEventListener('click', () => {
+
+      // Finalize timing and send one event
+_accumulateStepTime(lastStep);
+const totalMs = Object.values(stepTimes).reduce((a,b)=>a+b, 0);
+const payload = { step_times: stepTimes, total_ms: totalMs };
+
+if (window.Logger && typeof Logger.log_event === 'function') {
+  Logger.log_event('disclaimer_step_times', payload);
+} else {
+  console.log('disclaimer_step_times', payload);
+}
+
       // Absolute path so it resolves to repo/site root
       window.top.location.href = '/TacoTruck/ChatBot.html';
     });
 
     function updateStep() {
+      // Timing: track time spent on each step
+if (lastStep === null) {
+  lastStep = currentStep;
+  stepStartTime = Date.now();
+} else if (lastStep !== currentStep) {
+  _accumulateStepTime(lastStep);
+  lastStep = currentStep;
+}
+
       // Update step visibility
       steps.forEach(step => {
         step.classList.remove('active');
