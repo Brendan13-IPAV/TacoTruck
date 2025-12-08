@@ -277,14 +277,15 @@ function maybeShowRating() {
 
 // Handle rating click (+1 / 0 / −1)
 ratingRow.addEventListener('click', (e) => {
-  const v = e.target?.getAttribute?.('data-rate');
-  if (v === null || v === undefined) return;
-  const val = Number(v);
+  const btn = e.target.closest('.rateBtn');
+  if (!btn) return;
+
+  const val = Number(btn.getAttribute('data-rate'));
   if (window.TTLOG) TTLOG.push('test_rating', { test_number: testIndex, rating: val });
 
-  // Show "Next test" button after rating
   nextTestBtn.style.display = 'inline-block';
 });
+
 
 // Advance to next test or finish
 nextTestBtn.addEventListener('click', () => {
