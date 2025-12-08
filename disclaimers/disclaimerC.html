@@ -742,8 +742,12 @@ continueButton.addEventListener('click', () => {
   }
   // --- End timing block ---
 
-  window.top.location.href = '/TacoTruck/ChatBot.html';
+  // ⭐ tiny delay so the event is actually stored before navigation
+  setTimeout(() => {
+    window.top.location.href = '/TacoTruck/ChatBot.html';
+  }, 50);
 });
+
 
       
       window.top.location.href = '/TacoTruck/ChatBot.html';
