@@ -24,6 +24,25 @@
       --cta-contrast:#ffffff;
       --danger:#b91c1c;
     }
+    .rateBtn {
+  background: var(--pill);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 24px;        /* bigger emoji */
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.rateBtn:hover {
+  background: color-mix(in oklab, var(--accentA) 15%, var(--pill));
+  transform: translateY(-2px);
+}
+
+.rateBtn:active {
+  transform: translateY(0);
+}
+
     @media (prefers-color-scheme: dark){
       :root{
         --bg:#0b1220;
@@ -179,13 +198,16 @@
         </div>
       </section>
 
-      <div id="ratingRow" style="display:none;gap:10px;justify-content:center;align-items:center;">
-  <span style="font-size:13px;color:var(--muted)">Rate how well the bot understood your intent:</span>
-  <button class="secondary" data-rate="-1" aria-label="Bad (−1)">−1</button>
-  <button class="secondary" data-rate="0"  aria-label="Neutral (0)">0</button>
-  <button class="secondary" data-rate="1"  aria-label="Good (+1)">+1</button>
-  <button id="nextTest" class="send" style="display:none;">Next test</button>
+<div id="ratingRow" style="display:none;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
+  <span style="font-size:14px;color:var(--muted)">How well did the bot understand your intent?</span>
+
+  <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
+  <button class="rateBtn" data-rate="0" aria-label="Neutral">😐</button>
+  <button class="rateBtn" data-rate="1" aria-label="Good (thumbs up)">👍</button>
+
+  <button id="nextTest" class="send" style="display:none;font-size:14px;">Next test</button>
 </div>
+
 
 
       <div class="actions-center">
