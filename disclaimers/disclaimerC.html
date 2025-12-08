@@ -726,6 +726,24 @@ if (window.Logger && typeof Logger.log_event === 'function') {
 } else {
   console.log('disclaimer_step_times', payload);
 }
+continueButton.addEventListener('click', () => {
+  // --- Finalise per-step timing (send ONE event) ---
+  if (typeof _accumulateStepTime === 'function' && typeof lastStep !== 'undefined') {
+    _accumulateStepTime(lastStep);
+  }
+  const totalMs = (typeof stepTimes === 'object' && stepTimes)
+    ? Object.values(stepTimes).reduce((a, b) => a + b, 0)
+    : 0;
+  const payload = { step_times: stepTimes || {}, total_ms: totalMs };
+  if (window.Logger && typeof Logger.log_event === 'function') {
+    Logger.log_event('disclaimer_step_times', payload);
+  } else {
+    console.log('disclaimer_step_times', payload);
+  }
+  // --- End timing block ---
+
+  window.top.location.href = '/TacoTruck/ChatBot.html';
+});
 
       
       window.top.location.href = '/TacoTruck/ChatBot.html';
