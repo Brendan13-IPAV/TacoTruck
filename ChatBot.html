@@ -32,7 +32,7 @@
   grid-template-columns: 340px 1fr;   /* left panel 340px, right panel fills space */
   gap: 24px;
   padding: 24px;
-  max-width: 1600px;                 /* prevent the layout from stretching too much */
+  max-width: 2000px;                 /* prevent the layout from stretching too much */
   margin: 0 auto;                    /* center layout on very wide screens */
 }
     
@@ -43,26 +43,27 @@
 
 /* Left panel visual separation */
 .panel {
-  background: color-mix(in oklab, var(--bg) 94%, transparent);
+  background: color-mix(in oklab, var(--bg) 80%, #d1d5db 20%);
   border: 1px solid var(--border);
   border-radius: 14px;
-    min-width: 300px;
-  padding: 12px;
+  padding: 18px;
 }
 .panel-title {
   font-weight: 700;
   font-size: 13px;
   color: var(--muted);
   text-transform: uppercase;
-  letter-spacing: .04em;
-  margin-bottom: 6px;
+  letter-spacing: .05em;
+  margin-bottom: 8px;
 }
 .panel-box {
+  background: color-mix(in oklab, var(--bg) 95%, white 5%);
   border: 1px dashed var(--border);
   border-radius: 10px;
-  padding: 10px;
-  background: color-mix(in oklab, var(--pill) 30%, var(--bg));
+  padding: 12px;
+  margin-bottom: 24px;
 }
+    
 .panel .muted { color: var(--muted); }
 .small { font-size: 12px; }
 
@@ -156,11 +157,11 @@
       display:flex; justify-content:center; align-items:stretch;
       padding:12px;
     }
-    .wrap{
-      width:min(960px,100%);
-      min-width: 600px;
-      display:flex; flex-direction:column; gap:12px;
-    }
+.wrap {
+  width:min(960px,100%);
+  min-width: 600px;
+}
+
 
     /* Card */
     .card{
@@ -355,12 +356,7 @@ function setRandomSuggestionForTest() {
   }
 }
 
-// Insert suggestion text into the composer
-insertSuggestionBtn.addEventListener('click', () => {
-  if (!currentSuggestion) return;
-  inputEl.value = currentSuggestion.suggestion;
-  inputEl.focus();
-});
+
 
     
 // ----- Test loop state -----
