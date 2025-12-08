@@ -531,7 +531,7 @@
     <!-- Progress bar section -->
     <div class="progress-section" id="progressSection">
       <div class="progress-header">
-        <span class="progress-text">Before we begin</span>
+        <span class="progress-text">Important information</span>
         <span class="progress-count" id="progressCount">Step 1 of 4</span>
       </div>
       <div class="progress-bar-container">
@@ -687,22 +687,21 @@
 
     // Start button (final step)
     startButton.addEventListener('click', () => {
+      // Hide main sections and show success screen
       progressSection.style.display = 'none';
       contentSection.style.display = 'none';
       navigationSection.style.display = 'none';
       successScreen.classList.add('active');
       
-      // In production, this would proceed to the chatbot
+      // Keep your console trace
       console.log('Disclaimer completed - proceeding to chatbot');
     });
 
-    // Continue button (on success screen)
-const continueButton = document.getElementById('continueButton');
-
-continueButton.addEventListener('click', () => {
-  window.top.location.href = '../ChatBot.html';
-});
-
+    // Continue button — production redirect to GitHub Pages project: /TacoTruck/ChatBot.html
+    const continueButton = document.getElementById('continueButton');
+    continueButton.addEventListener('click', () => {
+      window.top.location.href = '/TacoTruck/ChatBot.html';
+    });
 
     function updateStep() {
       // Update step visibility
@@ -745,7 +744,7 @@ continueButton.addEventListener('click', () => {
     document.querySelectorAll('.step-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        // In production, these would link to actual documentation pages
+        // In production, wire these to your real documentation pages
       });
     });
   </script>
