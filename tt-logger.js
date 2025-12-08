@@ -1,8 +1,10 @@
-<!-- tt-logger.js -->
-<script>
+// tt-logger.js
 (() => {
   const KEY = 'tt_logs';
   const META_KEY = 'tt_meta';
+
+  // ✅ Add your Apps Script Web App URL here (ends with /exec). Keep placeholder if you don't have it yet.
+  const SHEET_URL = 'https://script.google.com/macros/s/REPLACE_WITH_YOURS/exec';
 
   function get() { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } }
   function set(v) { localStorage.setItem(KEY, JSON.stringify(v)); }
@@ -18,14 +20,16 @@
   window.TTLOG = {
     push(type, data = {}) {
       const s = get();
-      const meta = getMeta();           // ← NEW
+      const meta = getMeta();           // e.g. { disc: "B" }
       s.events.push({
         type, ts: now(),
-        ...meta,                        // ← NEW: e.g. { disc: "B" }
+        ...meta,
         ...data,
         session_id: s.session_id
       });
       set(s);
+
+      // (Next step we’ll post to SHEET_URL here)
     },
     exportCSV() {
       const s = get();
@@ -53,5 +57,3 @@
 
   window.TTLOG.push('page_view', { path: location.pathname + location.search });
 })();
-</script>
-
