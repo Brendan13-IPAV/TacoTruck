@@ -233,12 +233,8 @@
     }
 
     @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.8;
-      }
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
     }
 
     .step-description {
@@ -276,9 +272,7 @@
       transition: transform 0.3s ease;
     }
 
-    .step-link:hover::after {
-      transform: translateX(4px);
-    }
+    .step-link:hover::after { transform: translateX(4px); }
 
     /* Navigation section */
     .navigation-section {
@@ -304,9 +298,7 @@
       letter-spacing: 0.5px;
     }
 
-    .btn-next {
-      min-width: 240px;
-    }
+    .btn-next { min-width: 240px; }
 
     .btn-back {
       background-color: white;
@@ -322,21 +314,13 @@
     }
 
     @keyframes squash {
-      0%, 100% {
-        transform: scale(1.05, 1);
-      }
-      50% {
-        transform: scale(0.95, 1.1);
-      }
+      0%, 100% { transform: scale(1.05, 1); }
+      50% { transform: scale(0.95, 1.1); }
     }
 
-    .btn-back:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
+    .btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    .btn-next,
-    .btn-start {
+    .btn-next, .btn-start {
       background: linear-gradient(135deg, var(--green-primary) 0%, #46A302 100%);
       color: white;
       border-color: var(--green-primary);
@@ -345,35 +329,24 @@
       top: 0;
     }
 
-    .btn-next:hover,
-    .btn-start:hover {
+    .btn-next:hover, .btn-start:hover {
       top: 2px;
       box-shadow: 0 4px 0 #46A302;
       animation: wiggle 0.6s ease infinite;
     }
 
     @keyframes wiggle {
-      0%, 100% {
-        transform: rotate(0deg);
-      }
-      25% {
-        transform: rotate(-3deg) scale(1.05);
-      }
-      75% {
-        transform: rotate(3deg) scale(1.05);
-      }
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-3deg) scale(1.05); }
+      75% { transform: rotate(3deg) scale(1.05); }
     }
 
-    .btn-next:active,
-    .btn-start:active {
+    .btn-next:active, .btn-start:active {
       top: 6px;
       box-shadow: 0 0 0 #46A302;
     }
 
-    .btn-start {
-      min-width: 200px;
-      margin-left: auto;
-    }
+    .btn-start { min-width: 200px; margin-left: auto; }
 
     /* Success screen */
     .success-screen {
@@ -402,18 +375,9 @@
     }
 
     @keyframes successPop {
-      0% {
-        transform: scale(0);
-        rotate: 0deg;
-      }
-      50% {
-        transform: scale(1.2);
-        rotate: 180deg;
-      }
-      100% {
-        transform: scale(1);
-        rotate: 360deg;
-      }
+      0% { transform: scale(0); rotate: 0deg; }
+      50% { transform: scale(1.2); rotate: 180deg; }
+      100% { transform: scale(1); rotate: 360deg; }
     }
 
     .success-icon svg {
@@ -477,17 +441,11 @@
     }
 
     @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-8px);
-      }
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
     }
 
-    .continue-button:hover svg {
-      transform: rotate(12deg) scale(1.2);
-    }
+    .continue-button:hover svg { transform: rotate(12deg) scale(1.2); }
 
     .continue-button:active {
       top: 6px;
@@ -495,34 +453,12 @@
     }
 
     @media (max-width: 640px) {
-      .header-section {
-        padding: 20px 24px 12px 24px;
-      }
-
-      .content-section {
-        padding: 32px 24px;
-      }
-
-      .step[data-step="1"] .step-title {
-        font-size: 28px;
-        margin-left: -20px;
-      }
-
-      .progress-section {
-        padding: 20px 24px;
-      }
-
-      .navigation-section {
-        padding: 24px 24px;
-        flex-direction: column;
-      }
-
-      .btn-next,
-      .btn-start,
-      .btn-back {
-        width: 100%;
-        min-width: auto;
-      }
+      .header-section { padding: 20px 24px 12px 24px; }
+      .content-section { padding: 32px 24px; }
+      .step[data-step="1"] .step-title { font-size: 28px; margin-left: -20px; }
+      .progress-section { padding: 20px 24px; }
+      .navigation-section { padding: 24px 24px; flex-direction: column; }
+      .btn-next, .btn-start, .btn-back { width: 100%; min-width: auto; }
     }
   </style>
 </head>
@@ -689,22 +625,21 @@
 
     // Start button (final step)
     startButton.addEventListener('click', () => {
+      // Hide sections and show success
       progressSection.style.display = 'none';
       contentSection.style.display = 'none';
       navigationSection.style.display = 'none';
       successScreen.classList.add('active');
-      
-      // In production, this would proceed to the chatbot
+
+      // Log completion (kept for your telemetry)
       console.log('Disclaimer completed - proceeding to chatbot');
     });
 
-    // Continue button (on success screen)
- const continueButton = document.getElementById('continueButton');
-
-continueButton.addEventListener('click', () => {
-  window.top.location.href = '../ChatBot.html';
-});
-
+    // Continue button — redirect to GitHub Pages project root /TacoTruck/ChatBot.html
+    const continueButton = document.getElementById('continueButton');
+    continueButton.addEventListener('click', () => {
+      window.top.location.href = '/TacoTruck/ChatBot.html';
+    });
 
     function updateStep() {
       // Update step visibility
@@ -747,7 +682,7 @@ continueButton.addEventListener('click', () => {
     document.querySelectorAll('.step-link').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        // In production, these would link to actual documentation pages
+        // In production, wire these to your real docs pages
       });
     });
   </script>
