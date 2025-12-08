@@ -6,6 +6,34 @@
   // ✅ Add your Apps Script Web App URL here (ends with /exec). Keep placeholder if you don't have it yet.
   const SHEET_URL = 'https://script.google.com/macros/s/REPLACE_WITH_YOURS/exec';
 
+  function postToSheet(ev) {
+  // If not configured yet, do nothing (safe while you wait for access)
+  if (!SHEET_URL || /REPLACE_WITH_YOURS/.test(SHEET_URL)) return;
+
+  try {
+    const payload = JSON.stringify({ event: ev });
+
+    // Prefer sendBeacon so navigation/unload doesn't drop events
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: 'application/json' });
+      navigator.sendBeacon(SHEET_URL, blob);
+      return;
+    }
+
+    // Fallback: fire-and-forget fetch (opaque response is fine)
+    fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload,
+      mode: 'no-cors',
+      keepalive: true
+    });
+  } catch (_) {
+    // swallow errors; events still persist in localStorage
+  }
+}
+
+
   function get() { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } }
   function set(v) { localStorage.setItem(KEY, JSON.stringify(v)); }
   function now() { return new Date().toISOString(); }
@@ -18,19 +46,23 @@
   set(state);
 
   window.TTLOG = {
-    push(type, data = {}) {
-      const s = get();
-      const meta = getMeta();           // e.g. { disc: "B" }
-      s.events.push({
-        type, ts: now(),
-        ...meta,
-        ...data,
-        session_id: s.session_id
-      });
-      set(s);
+push(type, data = {}) {
+  const s = get();
+  const meta = getMeta();           // e.g. { disc: "B" }
+  const ev = {
+    type, ts: now(),
+    ...meta,
+    ...data,
+    session_id: s.session_id
+  };
 
-      // (Next step we’ll post to SHEET_URL here)
-    },
+  s.events.push(ev);
+  set(s);
+
+  // NEW: send to Google Sheets (no-op if SHEET_URL is placeholder)
+  postToSheet(ev);
+},
+
     exportCSV() {
       const s = get();
       const header = 'session_id,ts,type,disc,detail';
