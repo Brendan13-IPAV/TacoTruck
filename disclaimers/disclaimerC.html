@@ -713,45 +713,31 @@ function _accumulateStepTime(prevStep) {
     });
 
     // Continue button — production redirect to GitHub Pages project: /TacoTruck/ChatBot.html
-    const continueButton = document.getElementById('continueButton');
-    continueButton.addEventListener('click', () => {
-
-// Finalize timing and send one event
-_accumulateStepTime(lastStep);
-const totalMs = Object.values(stepTimes).reduce((a,b)=>a+b, 0);
-const payload = { step_times: stepTimes, total_ms: totalMs };
-
-if (window.Logger && typeof Logger.log_event === 'function') {
-  Logger.log_event('disclaimer_step_times', payload);
-} else {
-  console.log('disclaimer_step_times', payload);
-}
+   // Continue button — redirect to /TacoTruck/ChatBot.html
+const continueButton = document.getElementById('continueButton');
 continueButton.addEventListener('click', () => {
-  // --- Finalise per-step timing (send ONE event) ---
-  if (typeof _accumulateStepTime === 'function' && typeof lastStep !== 'undefined') {
+  // Finalise timing one last time if we didn't already
+  if (typeof _accumulateStepTime === 'function' && typeof lastStep !== 'undefined' && lastStep !== null) {
     _accumulateStepTime(lastStep);
+    lastStep = null;
   }
-  const totalMs = (typeof stepTimes === 'object' && stepTimes)
-    ? Object.values(stepTimes).reduce((a, b) => a + b, 0)
-    : 0;
-  const payload = { step_times: stepTimes || {}, total_ms: totalMs };
+
+  // Safe sum with initial 0
+  const totalMs = Object.values(stepTimes).reduce((a, b) => a + b, 0);
+  const payload = { step_times: stepTimes, total_ms: totalMs };
+
   if (window.Logger && typeof Logger.log_event === 'function') {
-    Logger.log_event('disclaimer_step_times', payload);
+    try { Logger.log_event('disclaimer_step_times', payload); } catch (e) { console.warn(e); }
   } else {
     console.log('disclaimer_step_times', payload);
   }
-  // --- End timing block ---
 
-  // ⭐ tiny delay so the event is actually stored before navigation
+  // Tiny delay so the event persists before navigation
   setTimeout(() => {
     window.top.location.href = '/TacoTruck/ChatBot.html';
   }, 50);
 });
 
-
-      
-      window.top.location.href = '/TacoTruck/ChatBot.html';
-    });
 
     function updateStep() {
 
