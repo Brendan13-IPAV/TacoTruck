@@ -74,6 +74,10 @@
 
     (async function init(){
       const chosen = await pickAvailable(CANDIDATES);
+      
+      // ✅ Save the assigned version for the rest of the flow
+localStorage.setItem('tt_meta', JSON.stringify({ disc: chosen.id }));
+      
       if (!chosen) {
         showError('No disclaimer file could be loaded. Check filenames/paths in /disclaimers.');
         return;
