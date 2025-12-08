@@ -32,7 +32,7 @@
   <script>
     // Map the actual files you have in GitHub (html or txt both fine)
     const CANDIDATES = [
-      { id: 'A', url: './disclaimers/disclaimerA.html' }, // change to .txt if that’s your file
+      { id: 'A', url: './disclaimers/disclaimerA.html' }, 
       { id: 'B', url: './disclaimers/disclaimerB.html' },
       { id: 'C', url: './disclaimers/disclaimerC.html' },
       { id: 'D', url: './disclaimers/disclaimerD.html' },
@@ -77,6 +77,7 @@
       if (!chosen) {
         showError('No disclaimer file could be loaded. Check filenames/paths in /disclaimers.');
         return;
+        localStorage.setItem('tt_meta', JSON.stringify({ disc: chosen.id }));
       }
       // Load the disclaimer; it owns the interaction and can navigate to ChatBot.html itself
       frame.src = chosen.url;
