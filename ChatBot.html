@@ -308,18 +308,32 @@
   <!-- Outline-only placeholder: replace or augment later with topic lookup / API -->
   <script>
     // ----- Outline endpoint placeholder (keep as-is for now) -----
-    async function getReplyDemo(userText) {
-      // Replace with your live outline call when ready (kept minimal per brief)
-      const res = await fetch('https://<your-vercel-domain>/api/intent-outline', {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ user_input: userText })
-      }).catch(()=>null);
-      if (!res) return 'No outline.';
-      try {
-        const data = await res.json();
-        return data.outline || 'No outline.';
-      } catch { return 'No outline.'; }
+// ----- REAL API CONNECTION -----
+async function getReplyDemo(userText) {
+  try {
+    // 1. Send the user's text to your local Python server
+    const res = await fetch('http://127.0.0.1:5000/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userText })
+    });
+
+    // 2. Check if the server is happy
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
     }
+
+    // 3. Get the JSON response
+    const data = await res.json();
+    return data.reply || 'No response text received.';
+
+  } catch (err) {
+    console.error(err);
+    // Fallback if the Python script isn't running
+    return "⚠️ Connection Error: Is your Python 'app.py' running? (I couldn't reach http://127.0.0.1:5000)";
+  }
+}
+    
 // ---- Topic suggestions (loaded from /data/topics.json) ----
 let TOPICS = [];
 let currentSuggestion = null;
