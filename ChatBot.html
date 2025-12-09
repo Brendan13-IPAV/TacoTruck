@@ -482,7 +482,7 @@ nextTestBtn.addEventListener('click', () => {
   if (!text) return;
 
   addMessage('user', text);
-  if (window.TTLOG) TTLOG.push('chat_user_turn', { text_len: text.length, test_number: testIndex });
+  if (window.TTLOG) TTLOG.push('chat_user_turn', { text: text, test_number: testIndex });
 
   inputEl.value = '';
   inputEl.focus();
