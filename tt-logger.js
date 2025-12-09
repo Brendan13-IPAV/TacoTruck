@@ -3,37 +3,41 @@
   const KEY = 'tt_logs';
   const META_KEY = 'tt_meta';
 
-  // ✅ Add your Apps Script Web App URL here (ends with /exec). Keep placeholder if you don't have it yet.
+  // ✅ DOUBLE CHECK: Is this the specific URL that gave you the "SUCCESS" message?
+  // If you did a "New Deployment" recently, this URL might have changed.
   const SHEET_URL = 'https://script.google.com/macros/s/AKfycbw6odtZwKhPRutH_DojB1XfWxpuJBu-GBkrsLhl1B1VYfD9OdT0V7bY6Fse38N8urJ3_Q/exec';
 
   function postToSheet(ev) {
-  // If not configured yet, do nothing (safe while you wait for access)
-  if (!SHEET_URL || /REPLACE_WITH_YOURS/.test(SHEET_URL)) return;
+    // If not configured yet, do nothing
+    if (!SHEET_URL || /REPLACE_WITH_YOURS/.test(SHEET_URL)) return;
 
-  try {
-    const payload = JSON.stringify({ event: ev });
+    try {
+      // FIX 1: Don't wrap it in { event: ev }. Send 'ev' directly so columns match.
+      const payload = JSON.stringify(ev);
 
-    // Prefer sendBeacon so navigation/unload doesn't drop events
-    if (navigator.sendBeacon) {
-      const blob = new Blob([payload], { type: 'application/json' });
-      navigator.sendBeacon(SHEET_URL, blob);
-      return;
+      // Prefer sendBeacon so navigation/unload doesn't drop events
+      if (navigator.sendBeacon) {
+        // FIX 2: Use 'text/plain' to avoid CORS preflight (OPTIONS) failures
+        const blob = new Blob([payload], { type: 'text/plain' });
+        navigator.sendBeacon(SHEET_URL, blob);
+        return;
+      }
+
+      // Fallback: fire-and-forget fetch
+      fetch(SHEET_URL, {
+        method: 'POST',
+        // FIX 3: Match 'text/plain' here too for consistency
+        headers: { 'Content-Type': 'text/plain' }, 
+        body: payload,
+        mode: 'no-cors',
+        keepalive: true
+      });
+    } catch (_) {
+      // swallow errors; events still persist in localStorage
     }
-
-    // Fallback: fire-and-forget fetch (opaque response is fine)
-    fetch(SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: payload,
-      mode: 'no-cors',
-      keepalive: true
-    });
-  } catch (_) {
-    // swallow errors; events still persist in localStorage
   }
-}
 
-
+  // --- (Rest of your original code remains unchanged below) ---
   function get() { try { return JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { return {}; } }
   function set(v) { localStorage.setItem(KEY, JSON.stringify(v)); }
   function now() { return new Date().toISOString(); }
@@ -46,22 +50,23 @@
   set(state);
 
   window.TTLOG = {
-push(type, data = {}) {
-  const s = get();
-  const meta = getMeta();           // e.g. { disc: "B" }
-  const ev = {
-    type, ts: now(),
-    ...meta,
-    ...data,
-    session_id: s.session_id
-  };
+    push(type, data = {}) {
+      const s = get();
+      const meta = getMeta();
+      const ev = {
+        type, 
+        ts: now(),
+        ...meta,
+        ...data,
+        session_id: s.session_id
+      };
 
-  s.events.push(ev);
-  set(s);
+      s.events.push(ev);
+      set(s);
 
-  // NEW: send to Google Sheets (no-op if SHEET_URL is placeholder)
-  postToSheet(ev);
-},
+      // Send to Google Sheets
+      postToSheet(ev);
+    },
 
     exportCSV() {
       const s = get();
