@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>TacoTruck - Logging Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-box {
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .status {
+      padding: 12px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+    .status.success { background: #d1fae5; color: #065f46; }
+    .status.error { background: #fee2e2; color: #991b1b; }
+    .status.waiting { background: #fef3c7; color: #92400e; }
+    button {
+      background: #0ea5e9;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 10px 10px 0;
+    }
+    button:hover { background: #0284c7; }
+    pre {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    h2 { color: #1e293b; margin-top: 30px; }
+    .info { color: #64748b; font-size: 14px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>🔍 TacoTruck Logging Diagnostic</h1>
+  <p class="info">This page will test if your logging system is working correctly.</p>
+
+  <!-- Test 1: Is tt-logger.js loaded? -->
+  <div class="test-box">
+    <h2>Test 1: Is tt-logger.js loaded?</h2>
+    <div id="test1" class="status waiting">Testing...</div>
+  </div>
+
+  <!-- Test 2: Can we access localStorage? -->
+  <div class="test-box">
+    <h2>Test 2: Can we access localStorage?</h2>
+    <div id="test2" class="status waiting">Testing...</div>
+  </div>
+
+  <!-- Test 3: Is the Google Sheet URL configured? -->
+  <div class="test-box">
+    <h2>Test 3: Is the Google Sheet URL configured?</h2>
+    <div id="test3" class="status waiting">Testing...</div>
+    <pre id="test3-url"></pre>
+  </div>
+
+  <!-- Test 4: Can we send a test event? -->
+  <div class="test-box">
+    <h2>Test 4: Send test event to Google Sheets</h2>
+    <button onclick="sendTestEvent()">Send Test Event</button>
+    <div id="test4" class="status waiting">Click the button to test</div>
+    <p class="info">After clicking, wait 5 seconds then check your Google Sheet for a row with type "diagnostic_test"</p>
+  </div>
+
+  <!-- Test 5: What events are in localStorage? -->
+  <div class="test-box">
+    <h2>Test 5: What's stored in localStorage?</h2>
+    <button onclick="showLocalStorage()">Show localStorage</button>
+    <div id="test5"></div>
+  </div>
+
+  <!-- Load tt-logger.js -->
+  <script src="../tt-logger.js"></script>
+
+  <script>
+    // Test 1: Check if TTLOG exists
+    setTimeout(() => {
+      const test1 = document.getElementById('test1');
+      if (window.TTLOG && typeof window.TTLOG.push === 'function') {
+        test1.className = 'status success';
+        test1.textContent = '✓ tt-logger.js is loaded correctly!';
+      } else {
+        test1.className = 'status error';
+        test1.textContent = '✗ tt-logger.js is NOT loaded. Check the file path.';
+      }
+    }, 500);
+
+    // Test 2: Check localStorage
+    setTimeout(() => {
+      const test2 = document.getElementById('test2');
+      try {
+        const testKey = 'tt_test';
+        localStorage.setItem(testKey, 'test');
+        localStorage.removeItem(testKey);
+        test2.className = 'status success';
+        test2.textContent = '✓ localStorage is working';
+      } catch (err) {
+        test2.className = 'status error';
+        test2.textContent = '✗ localStorage is blocked or unavailable: ' + err.message;
+      }
+    }, 500);
+
+    // Test 3: Check if URL is configured
+    setTimeout(() => {
+      const test3 = document.getElementById('test3');
+      const test3url = document.getElementById('test3-url');
+      
+      // Try to extract SHEET_URL from the loaded script
+      const scriptContent = document.querySelector('script[src*="tt-logger"]');
+      if (scriptContent) {
+        fetch('../tt-logger.js')
+          .then(r => r.text())
+          .then(content => {
+            const match = content.match(/const SHEET_URL = ['"](.+?)['"]/);
+            if (match && match[1]) {
+              const url = match[1];
+              test3url.textContent = url;
+              
+              if (url.includes('REPLACE_WITH_YOURS')) {
+                test3.className = 'status error';
+                test3.textContent = '✗ SHEET_URL is still the placeholder';
+              } else if (url.includes('script.google.com') && url.endsWith('/exec')) {
+                test3.className = 'status success';
+                test3.textContent = '✓ SHEET_URL looks correct';
+              } else {
+                test3.className = 'status error';
+                test3.textContent = '✗ SHEET_URL format looks wrong';
+              }
+            }
+          })
+          .catch(() => {
+            test3.className = 'status error';
+            test3.textContent = '✗ Could not read tt-logger.js';
+          });
+      }
+    }, 500);
+
+    // Test 4: Send test event
+    function sendTestEvent() {
+      const test4 = document.getElementById('test4');
+      
+      if (!window.TTLOG) {
+        test4.className = 'status error';
+        test4.textContent = '✗ TTLOG not available';
+        return;
+      }
+
+      try {
+        window.TTLOG.push('diagnostic_test', {
+          test_time: new Date().toISOString(),
+          test_message: 'This is a manual test from the diagnostic page',
+          test_number: Math.floor(Math.random() * 1000)
+        });
+        
+        test4.className = 'status success';
+        test4.textContent = '✓ Test event sent! Check your Google Sheet in 5 seconds for a row with type "diagnostic_test"';
+      } catch (err) {
+        test4.className = 'status error';
+        test4.textContent = '✗ Error sending: ' + err.message;
+      }
+    }
+
+    // Test 5: Show localStorage
+    function showLocalStorage() {
+      const test5 = document.getElementById('test5');
+      
+      try {
+        const logs = localStorage.getItem('tt_logs');
+        const meta = localStorage.getItem('tt_meta');
+        
+        let html = '<h3>tt_logs:</h3>';
+        if (logs) {
+          const parsed = JSON.parse(logs);
+          html += '<pre>' + JSON.stringify(parsed, null, 2) + '</pre>';
+          html += `<p class="info">Total events stored: ${parsed.events ? parsed.events.length : 0}</p>`;
+        } else {
+          html += '<p class="info">No logs found</p>';
+        }
+        
+        html += '<h3>tt_meta:</h3>';
+        if (meta) {
+          html += '<pre>' + JSON.stringify(JSON.parse(meta), null, 2) + '</pre>';
+        } else {
+          html += '<p class="info">No meta found</p>';
+        }
+        
+        test5.innerHTML = html;
+      } catch (err) {
+        test5.innerHTML = '<div class="status error">Error reading localStorage: ' + err.message + '</div>';
+      }
+    }
+  </script>
+</body>
+</html>
