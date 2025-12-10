@@ -303,6 +303,7 @@
 
 
   <!-- Telemetry logger -->
+  <script src="config.js"></script>
   <script src="tt-logger.js"></script>
 
   <!-- Outline-only placeholder: replace or augment later with topic lookup / API -->
@@ -313,6 +314,8 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbwwWFy-aiQSdAXlYaHTlX9K-o9NTw5IvjM7Oy8--4A8Qb1lt-ABfnxtq1JF6nEO6PULGw/exec"; 
 
 async function getReplyDemo(userText) {
+  // Grab the URL from our central config file
+  const apiUrl = TACO_CONFIG.SCRIPT_URL;
   try {
     // Send the message to your Google Script
     const res = await fetch(API_URL, {
