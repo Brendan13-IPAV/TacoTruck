@@ -519,7 +519,10 @@ nextTestBtn.addEventListener('click', () => {
     row.remove();
     addMessage('assistant', reply, {announce:true});
     const rt = Math.round(performance.now()-t0);
-    if (window.TTLOG) TTLOG.push('chat_bot_turn', { rt_ms: rt, test_number: testIndex });
+  if (window.TTLOG) TTLOG.push('chat_bot_turn', { 
+    test_number: testIndex, 
+    reply_text: reply 
+});
 
     // Count a completed exchange on this test
     turnsThisTest += 1;
