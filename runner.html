@@ -29,8 +29,8 @@
   <iframe id="frame" title="Disclaimer"></iframe>
 
   <!-- Local telemetry logger (kept as-is) -->
-    <script src="config.js"></script>
-  <script src="../tt-logger.js"></script>
+                      <script src="config.js"></script>
+                      <script src="../tt-logger.js"></script>
 
   <script>
 /* ===========================
@@ -58,7 +58,14 @@ function getSessionId() {
 }
 function withCtx(extra) {
   const disc = (JSON.parse(localStorage.getItem('tt_meta')||'{}').disc) || '';
-  return { ts: new Date().toISOString(), session_id: getSessionId(), disc, ...extra };
+// New: Use 'type' to match the rest of your system
+return { 
+  ts: new Date().toISOString(), 
+  session_id: getSessionId(), 
+  disc: disc, 
+  type: extra.event, // Map input 'event' to output 'type'
+  ...extra 
+};
 }
 
 // log that runner loaded
