@@ -5,7 +5,7 @@
 
   // ✅ DOUBLE CHECK: Is this the specific URL that gave you the "SUCCESS" message?
   // If you did a "New Deployment" recently, this URL might have changed.
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyMcR2NP6cAXRCfOtDG03t77aUBnHAtBw5Z2_KJX_49-FKfVyGBADtsmuGjp3Do7uWFzA/exec';
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwwWFy-aiQSdAXlYaHTlX9K-o9NTw5IvjM7Oy8--4A8Qb1lt-ABfnxtq1JF6nEO6PULGw/exec';
 
   function postToSheet(ev) {
     // If not configured yet, do nothing
