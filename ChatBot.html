@@ -309,28 +309,25 @@
   <script>
     // ----- Outline endpoint placeholder (keep as-is for now) -----
 // ----- REAL API CONNECTION -----
+// REPLACE THIS URL with the new one you just copied from the Deploy step!
+const API_URL = "https://script.google.com/macros/s/AKfycbwwWFy-aiQSdAXlYaHTlX9K-o9NTw5IvjM7Oy8--4A8Qb1lt-ABfnxtq1JF6nEO6PULGw/exec"; 
+
 async function getReplyDemo(userText) {
   try {
-    // 1. Send the user's text to your local Python server
-    const res = await fetch('http://127.0.0.1:5000/chat', {
+    // Send the message to your Google Script
+    const res = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      // We use text/plain to avoid "CORS" errors with Google Apps Script
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ message: userText })
     });
 
-    // 2. Check if the server is happy
-    if (!res.ok) {
-      throw new Error(`Server error: ${res.status}`);
-    }
-
-    // 3. Get the JSON response
     const data = await res.json();
     return data.reply || 'No response text received.';
 
   } catch (err) {
     console.error(err);
-    // Fallback if the Python script isn't running
-    return "⚠️ Connection Error: Is your Python 'app.py' running? (I couldn't reach http://127.0.0.1:5000)";
+    return "⚠️ Connection Error: Could not reach the AI server.";
   }
 }
     
