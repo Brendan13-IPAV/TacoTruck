@@ -22,19 +22,21 @@
       border-bottom: 1px solid #fecaca; z-index: 9999;
     }
   </style>
+  
 </head>
 <body>
   <div id="err"></div>
   <iframe id="frame" title="Disclaimer"></iframe>
 
   <!-- Local telemetry logger (kept as-is) -->
+    <script src="config.js"></script>
   <script src="../tt-logger.js"></script>
 
   <script>
 /* ===========================
    Google Sheet logging (minimal)
    =========================== */
-const LOG_ENDPOINT = "https://script.google.com/macros/s/AKfycbwP-BtZ-hwjFrHK0wgcgis31GQuF3YARMj9Mzja1DVLQ5vy3iPRSPZEaIpje0epjjU7/exec";  // your Web App URL
+const LOG_ENDPOINT = TACO_CONFIG.SCRIPT_URL;
 
 async function sendLog(payload) {
   try {
