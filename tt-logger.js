@@ -3,9 +3,8 @@
   const KEY = 'tt_logs';
   const META_KEY = 'tt_meta';
 
-  // ✅ DOUBLE CHECK: Is this the specific URL that gave you the "SUCCESS" message?
-  // If you did a "New Deployment" recently, this URL might have changed.
-  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzgaTXQUl4yfsUsOKHtIMzu5KGM6noBfHdmNiMEu5_4_jt2LVAPMq1x4I2O3c4oIQVUTA/exec';
+// Use the global config if it exists, otherwise fallback to empty
+const SHEET_URL = (typeof TACO_CONFIG !== 'undefined') ? TACO_CONFIG.SCRIPT_URL : '';
 
   function postToSheet(ev) {
     // If not configured yet, do nothing
