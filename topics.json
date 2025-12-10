@@ -1,0 +1,12 @@
+[
+  {
+    "keywords": ["cost", "price", "fee", "expensive", "money"],
+    "topic": "Costs",
+    "answer_guide": "Trade mark application fees start at $250. Patents are much more expensive ($4,000+). Do not give a specific quote for patents, just a range."
+  },
+  {
+    "keywords": ["time", "long", "duration", "years", "expire"],
+    "topic": "Timing",
+    "answer_guide": "Trade marks last 10 years and can be renewed indefinitely. Patents typically last 20 years."
+  }
+]
