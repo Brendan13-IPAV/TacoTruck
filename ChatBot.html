@@ -308,29 +308,35 @@
 
   <!-- Outline-only placeholder: replace or augment later with topic lookup / API -->
   <script>
-    // ----- Outline endpoint placeholder (keep as-is for now) -----
+
+    
 // ----- REAL API CONNECTION -----
-// REPLACE THIS URL with the new one you just copied from the Deploy step!
-const API_URL = "https://script.google.com/macros/s/AKfycbwwWFy-aiQSdAXlYaHTlX9K-o9NTw5IvjM7Oy8--4A8Qb1lt-ABfnxtq1JF6nEO6PULGw/exec"; 
 
 async function getReplyDemo(userText) {
-  // Grab the URL from our central config file
+  
+
   const apiUrl = TACO_CONFIG.SCRIPT_URL;
+
   try {
-    // Send the message to your Google Script
-    const res = await fetch(API_URL, {
+    // 2. Send the message to Google Script using the dynamic 'apiUrl'
+    const res = await fetch(apiUrl, {
       method: 'POST',
-      // We use text/plain to avoid "CORS" errors with Google Apps Script
-      headers: { 'Content-Type': 'text/plain' },
+      headers: { 'Content-Type': 'text/plain' }, // avoids CORS errors
       body: JSON.stringify({ message: userText })
     });
 
+    // 3. Check network status
+    if (!res.ok) {
+      throw new Error(`Server returned ${res.status} ${res.statusText}`);
+    }
+
+    // 4. Get the answer
     const data = await res.json();
     return data.reply || 'No response text received.';
 
   } catch (err) {
-    console.error(err);
-    return "⚠️ Connection Error: Could not reach the AI server.";
+    console.error("Chat Error:", err);
+    return "⚠️ Connection Error: " + err.message;
   }
 }
     
