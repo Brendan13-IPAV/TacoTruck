@@ -25,6 +25,38 @@
       --danger:#b91c1c;
       
     }
+
+    #ratingRow {
+  background: color-mix(in oklab, var(--accentA) 8%, var(--bg));
+  border: 2px solid var(--accentA);
+  border-radius: 12px;
+  padding: 16px !important;
+  margin: 12px 0;
+}
+
+    @keyframes flashClear {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.clearing {
+  animation: flashClear 0.4s ease-in-out;
+}
+    
+#ratingRow span {
+  font-weight: 600;
+}
+
+.rateBtn.selected {
+  background: var(--accentA);
+  color: white;
+  transform: scale(1.1);
+}
+
+.rateBtn.dimmed {
+  opacity: 0.3;
+  pointer-events: none;
+}
 /* --- FIXED, WIDE TWO-COLUMN LAYOUT --- */
 .layout {
   height: calc(50% - 57px);
@@ -43,25 +75,28 @@
 
 /* Left panel visual separation */
 .panel {
-  background: color-mix(in oklab, var(--bg) 80%, #d1d5db 20%);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #fef3c7 0%, #dbeafe 100%);
+  border: 2px solid var(--accentA);
   border-radius: 14px;
   padding: 18px;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
 }
-.panel-title {
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  margin-bottom: 8px;
-}
+
 .panel-box {
-  background: color-mix(in oklab, var(--bg) 95%, white 5%);
-  border: 1px dashed var(--border);
+  background: white;
+  border: 2px dashed var(--accentA);
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 24px;
+}
+
+.panel-title {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--accentB);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 8px;
 }
     
 .panel .muted { color: var(--muted); }
@@ -406,6 +441,12 @@ function setupTest() {
   turnsThisTest = 0;
   ratingRow.style.display = 'none';
   nextTestBtn.style.display = 'none';
+
+  // NEW: Remove selected/dimmed states
+  document.querySelectorAll('.rateBtn').forEach(b => {
+    b.classList.remove('selected', 'dimmed');
+  });
+  
   if (window.TTLOG) TTLOG.push('test_setup', { test_number: testIndex });
   resetConversation();
 
@@ -425,11 +466,22 @@ ratingRow.addEventListener('click', (e) => {
   const btn = e.target.closest('.rateBtn');
   if (!btn) return;
 
+
   const val = Number(btn.getAttribute('data-rate'));
   if (window.TTLOG) TTLOG.push('test_rating', { test_number: testIndex, rating: val });
 
+    // NEW: Add selected state
+  document.querySelectorAll('.rateBtn').forEach(b => {
+    b.classList.remove('selected');
+    b.classList.add('dimmed');
+  });
+  btn.classList.remove('dimmed');
+  btn.classList.add('selected');
+
   nextTestBtn.style.display = 'inline-block';
 });
+
+
 
 
 // Advance to next test or finish
