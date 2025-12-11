@@ -278,6 +278,15 @@
   max-width: 900px;               /* don’t sprawl across full width */
   margin-inline: auto;            /* center the smaller block */
 }
+  /* Make the rating question text larger */
+#ratingRow .rating-question {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);         /* darker than muted so it's readable */
+  text-align: center;
+  line-height: 1.3;
+}
+
 #ratingRow span {
   font-size: 15px;                /* was 24px inline; this is the new size */
   line-height: 1.25;
@@ -301,6 +310,27 @@
 }
 #testStatus strong,
 #testHint { white-space: nowrap; }
+
+  /* ===== STABILISE CHAT WIDTH ===== */
+
+/* Increase the minimum width so content never forces expansion */
+.wrap {
+  min-width: 700px !important;   /* was 600px; increase to stop resizing */
+  max-width: 760px;              /* optional: keeps chat a nice readable width */
+}
+
+/* Give the chat card room so internal scrollbars never change outer width */
+.card {
+  min-width: 700px !important;
+}
+
+/* Ensure the layout grid expects this width */
+.layout {
+  grid-template-columns: 340px 1fr;
+  min-width: 1100px;  /* 340 left + 24 gap + ~740 chat (safe combined width) */
+}
+
+  
 
 </style>
 
@@ -359,7 +389,8 @@
             </div>
       </section>
 <div id="ratingRow" style="visibility:hidden;display:flex;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
-  <span>How well did the bot understand your intent?</span>
+<span class="rating-question">How well did the bot understand your intent?</span>
+
   <div class="rating-buttons">
     <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
     <button class="rateBtn" data-rate="0"  aria-label="Neutral">😐</button>
@@ -483,11 +514,6 @@ let turnsThisTest = 0;
 
 // Optional: prompts you plan to show per test (leave blank if you don't want hints)
 const TEST_HINTS = [
-  "Try a cost/timing style question",
-  "Ask about renewal/expiry",
-  "Ask about takedowns/enforcement",
-  "Ask about differences between IP rights",
-  "Ask about international scope"
 ];
 
 const testCounterEl = document.getElementById('testCounter');
