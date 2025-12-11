@@ -269,19 +269,15 @@
 
         <div id="messages" class="messages" tabindex="0"></div>
 
-        <div class="footer">
+ <div class="footer">
           <div class="controls">
             <label for="input" class="visually-hidden">Your message</label>
-            <textarea id="input" rows="2" placeholder="Ask about Australian patents, trade marks, copyright…" aria-label="Type your question"></textarea>
+            <textarea id="input" rows="2" placeholder="Ask your question as a user here." aria-label="Type your question"></textarea>
             <div style="display:flex; flex-direction:column; gap:8px;">
               <button id="send" class="send" aria-label="Send message">Send</button>
               <button id="clear" class="secondary" aria-label="Clear conversation">Clear</button>
             </div>
-          </div>
-          <div id="kbdHint" class="hint">Enter = send · Shift+Enter = new line</div>
-        </div>
       </section>
-
       <div id="ratingRow" style="display:none;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
         <span style="font-size:24px;color:var(--muted)">How well did the bot understand your intent?</span>
         <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
@@ -289,13 +285,18 @@
         <button class="rateBtn" data-rate="1"  aria-label="Good (thumbs up)">👍</button>
         <button id="nextTest" class="send" style="display:none;font-size:14px;">Next test</button>
       </div>
-
-      <div class="actions-center">
+      <div class="actions-center" style="margin-top: 200px;">
         <button id="surveyBtn" class="secondary" aria-label="Finish and take survey">Finish &amp; take survey</button>
       </div>
+      <p class="fineprint" role="note">
+        Prototype only — this does not provide accurate information, and especially does not provide legal advice.
+      </p>
+    </section>
+  </div>
+</main>
 
       <p class="fineprint" role="note">
-        Prototype only — provides general information, not legal advice.
+        Prototype only — this does not provide accurate information, and especially does not provide legal advice.
       </p>
     </section>
   </div>
