@@ -421,15 +421,26 @@ async function loadTopics() {
 
 // Pick and show a random suggestion for the current test
 function setRandomSuggestionForTest() {
-  if (!TOPICS.length) { suggestionWrap.style.display = 'none'; return; }
+  if (!TOPICS.length) { 
+    suggestionWrap.style.display = 'none'; 
+    return; 
+  }
+
+  // 1. Pick a random item
   currentSuggestion = TOPICS[Math.floor(Math.random() * TOPICS.length)];
-  suggestionText.textContent = currentSuggestion.suggestion;
-   suggestionWrap.style.display = 'block';
+
+  // 2. Update the text on screen
+  // We use the new "suggestion" field from your JSON
+  suggestionText.textContent = currentSuggestion.suggestion || "Ask a random question about IP.";
+  
+  suggestionWrap.style.display = 'block';
+
+  // 3. Log what was suggested (so you know what they were prompted to ask)
   if (window.TTLOG) {
     TTLOG.push('test_suggestion', {
       test_number: testIndex,
-      intent: currentSuggestion.intent,
-      category: currentSuggestion.category
+      topic_id: currentSuggestion.topic,  // Logs the Topic ID (Col A)
+      suggestion_text: currentSuggestion.suggestion 
     });
   }
 }
