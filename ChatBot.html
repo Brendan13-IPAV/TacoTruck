@@ -408,14 +408,15 @@ const suggestionText = document.getElementById('suggestionText');
 
 async function loadTopics() {
   try {
-    const res = await fetch('data/topics.json', { cache: 'no-store' });
+    const res = await fetch('topics.json', { cache: 'no-store' });
     if (!res.ok) throw new Error('topics fetch failed');
     TOPICS = await res.json();
   } catch {
     // Fallback if file missing or blocked
-    TOPICS = [
-      { intent:'Your choice!', suggestion:'Ask anything you want!' }
-    ];
+TOPICS = [
+  { topic:'Your choice!', suggestion:'Ask anything you want!' }
+];
+
   }
 }
 
