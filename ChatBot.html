@@ -27,7 +27,7 @@
     }
 /* --- FIXED, WIDE TWO-COLUMN LAYOUT --- */
 .layout {
-  height: calc(100% - 57px);
+  height: calc(50% - 57px);
   display: grid;
   grid-template-columns: 340px 1fr;   /* left panel 340px, right panel fills space */
   gap: 24px;
@@ -255,7 +255,7 @@
         <div id="suggestionWrap" class="panel-box" style="display:none;">
           <em id="suggestionText"></em>
           <p class="muted small" style="margin:8px 0 0">
-            Write your own wording — do not copy this text.
+            How would a real user ask about this? Don't copy this text.
           </p>
         </div>
       </div>
@@ -489,9 +489,9 @@ nextTestBtn.addEventListener('click', () => {
       messagesEl.innerHTML = '';
       addMessage(
         'assistant',
-        "Hello! I'm here to help you test questions about Australian intellectual property law.\n\n" +
-        "I provide general information only — not legal advice. For advice about your situation, please consult a qualified legal professional.\n\n" +
-        "What would you like to know?",
+        "Hello! I'm the Taco Truck chatbot prototype.\n\n" +
+        "I provide information only — not legal advice.\n\n" +
+        "How can I help you today?",
         {announce:true}
       );
       inputEl.value = '';
