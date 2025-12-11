@@ -317,7 +317,7 @@
               <button id="clear" class="secondary" aria-label="Clear conversation">Clear</button>
             </div>
       </section>
-      <div id="ratingRow" style="display:none;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
+      <div id="ratingRow" style="visibility:hidden;display:flex;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
         <span style="font-size:24px;color:var(--muted)">How well did the bot understand your intent?</span>
         <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
         <button class="rateBtn" data-rate="0"  aria-label="Neutral">😐</button>
@@ -443,7 +443,7 @@ function setupTest() {
   testCounterEl.textContent = `Test ${testIndex} of ${TOTAL_TESTS}`;
   testHintEl.textContent = TEST_HINTS[testIndex - 1] ? `• ${TEST_HINTS[testIndex - 1]}` : '';
   turnsThisTest = 0;
-  ratingRow.style.display = 'none';
+ratingRow.style.visibility = 'hidden';
   nextTestBtn.style.display = 'none';
 
   // NEW: Remove selected/dimmed states
@@ -461,7 +461,7 @@ function setupTest() {
 // After at least one user → bot exchange, show the rating
 function maybeShowRating() {
   if (turnsThisTest > 0) {
-    ratingRow.style.display = 'flex';
+    ratingRow.style.visibility = 'visible';
   }
 }
 
