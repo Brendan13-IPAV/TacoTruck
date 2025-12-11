@@ -41,9 +41,6 @@
   min-height: 120px;  /* ADD THIS LINE - reserves fixed space */
 }
 
-.layout { grid-template-columns: 340px minmax(0, 1fr); }
-
-    
 #ratingRow span {
   font-weight: 600;
   font-size: 16px;
@@ -326,33 +323,6 @@
 
         <div id="messages" class="messages" tabindex="0"></div>
 
-<section class="wrap">
-  <section class="card" role="region" aria-label="Chat window">
-    <div id="live" class="visually-hidden" aria-live="polite" aria-atomic="false"></div>
-    <div id="messages" class="messages" tabindex="0"></div>
-
-    <!-- Rating row lives INSIDE the card -->
-    <div id="ratingRow" class="" style="display:flex;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
-      <span class="muted" style="font-size:24px;">How well did the bot understand your intent?</span>
-      <div class="rating-buttons">
-        <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
-        <button class="rateBtn" data-rate="0"  aria-label="Neutral">😐</button>
-        <button class="rateBtn" data-rate="1"  aria-label="Good (thumbs up)">👍</button>
-        <button id="nextTest" class="send" style="display:none;font-size:14px;">Next test</button>
-      </div>
-    </div>
-
-    <div class="footer">…</div>
-  </section>
-
-  <!-- These live OUTSIDE the card but still inside .wrap -->
-  <div class="actions-center" style="margin-top:200px;">
-    <button id="surveyBtn" class="secondary">Finish &amp; take survey</button>
-  </div>
-  <p class="fineprint">Prototype only — this does not provide accurate information, and especially does not provide legal advice.</p>
-</section>
-
-        
  <div class="footer">
           <div class="controls">
             <label for="input" class="visually-hidden">Your message</label>
@@ -491,7 +461,7 @@ function setupTest() {
   testCounterEl.textContent = `Test ${testIndex} of ${TOTAL_TESTS}`;
   testHintEl.textContent = TEST_HINTS[testIndex - 1] ? `• ${TEST_HINTS[testIndex - 1]}` : '';
   turnsThisTest = 0;
-ratingRow.style.visibility = 'is-visible';
+ratingRow.style.visibility = 'hidden';
   nextTestBtn.style.display = 'none';
 
   // NEW: Remove selected/dimmed states
@@ -685,8 +655,3 @@ nextTestBtn.addEventListener('click', () => {
   </script>
 </body>
 </html>
-
-
-
-
-
