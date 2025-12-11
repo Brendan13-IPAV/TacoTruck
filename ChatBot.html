@@ -41,6 +41,9 @@
   min-height: 120px;  /* ADD THIS LINE - reserves fixed space */
 }
 
+.layout { grid-template-columns: 340px minmax(0, 1fr); }
+
+    
 #ratingRow span {
   font-weight: 600;
   font-size: 16px;
@@ -461,7 +464,7 @@ function setupTest() {
   testCounterEl.textContent = `Test ${testIndex} of ${TOTAL_TESTS}`;
   testHintEl.textContent = TEST_HINTS[testIndex - 1] ? `• ${TEST_HINTS[testIndex - 1]}` : '';
   turnsThisTest = 0;
-ratingRow.style.visibility = 'hidden';
+ratingRow.style.visibility = 'is-visible';
   nextTestBtn.style.display = 'none';
 
   // NEW: Remove selected/dimmed states
