@@ -30,12 +30,26 @@
   overflow-y: scroll;
 }
 
-    #ratingRow {
+#ratingRow {
   background: color-mix(in oklab, var(--accentA) 8%, var(--bg));
   border: 2px solid var(--accentA);
   border-radius: 12px;
   padding: 16px !important;
   margin: 12px 0;
+  flex-direction: column;
+  gap: 12px !important;
+}
+
+#ratingRow span {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.rating-buttons {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
 }
 
     @keyframes flashClear {
@@ -317,13 +331,16 @@
               <button id="clear" class="secondary" aria-label="Clear conversation">Clear</button>
             </div>
       </section>
-      <div id="ratingRow" style="visibility:hidden;display:flex;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
-        <span style="font-size:24px;color:var(--muted)">How well did the bot understand your intent?</span>
-        <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
-        <button class="rateBtn" data-rate="0"  aria-label="Neutral">😐</button>
-        <button class="rateBtn" data-rate="1"  aria-label="Good (thumbs up)">👍</button>
-        <button id="nextTest" class="send" style="display:none;font-size:14px;">Next test</button>
-      </div>
+<div id="ratingRow" style="visibility:hidden;display:flex;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
+  <span style="font-size:24px;color:var(--muted)">How well did the bot understand your intent?</span>
+  <div class="rating-buttons">
+    <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
+    <button class="rateBtn" data-rate="0"  aria-label="Neutral">😐</button>
+    <button class="rateBtn" data-rate="1"  aria-label="Good (thumbs up)">👍</button>
+    <button id="nextTest" class="send" style="display:none;font-size:14px;">Next test</button>
+  </div>
+  </div>
+            
       <div class="actions-center" style="margin-top: 200px;">
         <button id="surveyBtn" class="secondary" aria-label="Finish and take survey">Finish &amp; take survey</button>
       </div>
