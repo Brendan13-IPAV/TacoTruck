@@ -3,36 +3,35 @@
   const KEY = 'tt_logs';
   const META_KEY = 'tt_meta';
 
-// Use the global config if it exists, otherwise fallback to empty
-const SHEET_URL = (typeof TACO_CONFIG !== 'undefined') ? TACO_CONFIG.SCRIPT_URL : '';
+// // Use the global config if it exists, otherwise fallback to empty
+// const SHEET_URL = (typeof TACO_CONFIG !== 'undefined') ? TACO_CONFIG.SCRIPT_URL : '';
 
   function postToSheet(ev) {
-    // If not configured yet, do nothing
-    if (!SHEET_URL || /REPLACE_WITH_YOURS/.test(SHEET_URL)) return;
+    // FIX: Look up the URL right NOW, instead of at the top of the file.
+    // This ensures config.js has time to load.
+    const url = (typeof TACO_CONFIG !== 'undefined') ? TACO_CONFIG.SCRIPT_URL : '';
+
+    // If no URL found, stop.
+    if (!url || /REPLACE_WITH_YOURS/.test(url)) return;
 
     try {
-      // FIX 1: Don't wrap it in { event: ev }. Send 'ev' directly so columns match.
       const payload = JSON.stringify(ev);
 
-      // Prefer sendBeacon so navigation/unload doesn't drop events
       if (navigator.sendBeacon) {
-        // FIX 2: Use 'text/plain' to avoid CORS preflight (OPTIONS) failures
         const blob = new Blob([payload], { type: 'text/plain' });
-        navigator.sendBeacon(SHEET_URL, blob);
+        navigator.sendBeacon(url, blob); // Use local 'url' variable
         return;
       }
 
-      // Fallback: fire-and-forget fetch
-      fetch(SHEET_URL, {
+      fetch(url, { // Use local 'url' variable
         method: 'POST',
-        // FIX 3: Match 'text/plain' here too for consistency
         headers: { 'Content-Type': 'text/plain' }, 
         body: payload,
         mode: 'no-cors',
         keepalive: true
       });
     } catch (_) {
-      // swallow errors; events still persist in localStorage
+      // swallow errors
     }
   }
 
