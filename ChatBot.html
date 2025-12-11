@@ -258,6 +258,50 @@
     50%{ opacity:.3 }
   }
   .clearing{ animation: flashClear .4s ease-in-out }
+
+  /* ===== PATCH: keep layout width stable and shrink rating row ===== */
+
+/* 1) Grid never shrinks the chat column when internals gain a scrollbar */
+.layout { grid-template-columns: 340px minmax(600px, 1fr); }
+
+/* 2) The messages area keeps a stable scrollbar gutter (prevents tiny nudges) */
+.messages {
+  scrollbar-gutter: stable both-edges;
+  overflow-y: auto; /* unchanged behavior, just explicit */
+}
+
+/* 3) Make the rating question + buttons smaller and shorter overall */
+#ratingRow {
+  padding: 10px 12px !important;  /* tighter */
+  gap: 8px !important;
+  min-height: 100px;              /* lower than 120px */
+  max-width: 900px;               /* don’t sprawl across full width */
+  margin-inline: auto;            /* center the smaller block */
+}
+#ratingRow span {
+  font-size: 15px;                /* was 24px inline; this is the new size */
+  line-height: 1.25;
+  font-weight: 600;
+}
+.rating-buttons {
+  gap: 10px;
+  min-width: 0;                   /* don’t force width */
+}
+.rateBtn {
+  padding: 8px 12px;
+  font-size: 20px;                /* smaller emoji/buttons */
+}
+
+/* 4) Keep “Test 1 of 5” on one line and stop the hint wrapping */
+#testStatus {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: nowrap;              /* no wrapping inside the status row */
+}
+#testStatus strong,
+#testHint { white-space: nowrap; }
+
 </style>
 
 </head>
@@ -315,7 +359,7 @@
             </div>
       </section>
 <div id="ratingRow" style="visibility:hidden;display:flex;gap:14px;justify-content:center;align-items:center;padding:12px 0;">
-  <span style="font-size:18px;color:var(--muted)">How well did the bot understand your intent?</span>
+  <span>How well did the bot understand your intent?</span>
   <div class="rating-buttons">
     <button class="rateBtn" data-rate="-1" aria-label="Bad (thumbs down)">👎</button>
     <button class="rateBtn" data-rate="0"  aria-label="Neutral">😐</button>
