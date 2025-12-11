@@ -208,11 +208,11 @@
     }
 
     /* Messages */
-    .messages{
-      flex:1; min-height:260px; max-height:72vh;
-      overflow:auto; padding:14px;
-      background: color-mix(in oklab, var(--bg) 98%, transparent);
-    }
+.messages{
+  flex:1; min-height:260px; max-height:72vh;
+  overflow-y:scroll; padding:14px;
+  background: color-mix(in oklab, var(--bg) 98%, transparent);
+}
     .row{display:flex; margin:8px 0}
     .row.user{justify-content:flex-end}
     .bubble{
