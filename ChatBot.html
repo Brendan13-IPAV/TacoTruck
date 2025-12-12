@@ -523,6 +523,8 @@ const nextTestBtn = document.getElementById('nextTest');
 
 // Prepare the UI for a given test
 function setupTest() {
+    currentRating = null;  // Reset rating for new test
+
   testCounterEl.textContent = `Test ${testIndex} of ${TOTAL_TESTS}`;
   testHintEl.textContent = TEST_HINTS[testIndex - 1] ? `• ${TEST_HINTS[testIndex - 1]}` : '';
   turnsThisTest = 0;
@@ -548,16 +550,18 @@ function maybeShowRating() {
   }
 }
 
+ // Track current rating selection (but don't log it yet)
+let currentRating = null;
+
 // Handle rating click (+1 / 0 / −1)
 ratingRow.addEventListener('click', (e) => {
   const btn = e.target.closest('.rateBtn');
   if (!btn) return;
 
+  // Store the rating value but don't log yet
+  currentRating = Number(btn.getAttribute('data-rate'));
 
-  const val = Number(btn.getAttribute('data-rate'));
-  if (window.TTLOG) TTLOG.push('test_rating', { test_number: testIndex, rating: val });
-
-    // NEW: Add selected state
+  // Update visual state to show selection
   document.querySelectorAll('.rateBtn').forEach(b => {
     b.classList.remove('selected');
     b.classList.add('dimmed');
@@ -573,14 +577,28 @@ ratingRow.addEventListener('click', (e) => {
 
 // Advance to next test or finish
 nextTestBtn.addEventListener('click', () => {
+  // NOW log the rating (only when they click Next)
+  if (currentRating !== null && window.TTLOG) {
+    TTLOG.push('test_rating', { test_number: testIndex, rating: currentRating });
+  }
+  
   if (window.TTLOG) TTLOG.push('test_completed', { test_number: testIndex, turns: turnsThisTest });
+  
   testIndex += 1;
   if (testIndex > TOTAL_TESTS) {
     if (window.TTLOG) TTLOG.push('tests_all_completed', { total: TOTAL_TESTS });
-    // After finishing, you can auto-open the survey or simply hide the rating row
+    
+    // Hide the rating row completely
     ratingRow.style.display = 'none';
-    // (leave user to click your existing "Finish & take survey" button)
+    
+    // Hide the test panel as well
+    document.querySelector('.panel').style.display = 'none';
+    
+    // Optional: show a completion message
+    addMessage('assistant', '🎉 All tests complete! Please click "Finish & take survey" below.', {announce:true});
+    
   } else {
+    currentRating = null;  // Reset for next test
     setupTest();
   }
 });
