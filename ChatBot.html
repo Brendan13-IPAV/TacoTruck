@@ -523,24 +523,24 @@ const nextTestBtn = document.getElementById('nextTest');
 
 // Prepare the UI for a given test
 function setupTest() {
-    currentRating = null;  // Reset rating for new test
+  currentRating = null;  // Reset rating for new test
 
   testCounterEl.textContent = `Test ${testIndex} of ${TOTAL_TESTS}`;
   testHintEl.textContent = TEST_HINTS[testIndex - 1] ? `• ${TEST_HINTS[testIndex - 1]}` : '';
   turnsThisTest = 0;
-ratingRow.style.visibility = 'hidden';
+  ratingRow.style.visibility = 'hidden';
   nextTestBtn.style.display = 'none';
 
-  // NEW: Remove selected/dimmed states
+  // Remove selected state only (no dimmed)
   document.querySelectorAll('.rateBtn').forEach(b => {
-    b.classList.remove('selected', 'dimmed');
+    b.classList.remove('selected');
   });
   
   if (window.TTLOG) TTLOG.push('test_setup', { test_number: testIndex });
   resetConversation();
 
-  // NEW: display a random suggestion for this test
-    setRandomSuggestionForTest();
+  // Display a random suggestion for this test
+  setRandomSuggestionForTest();
 }
 
 // After at least one user → bot exchange, show the rating
@@ -553,6 +553,7 @@ function maybeShowRating() {
  // Track current rating selection (but don't log it yet)
 let currentRating = null;
 
+
 // Handle rating click (+1 / 0 / −1)
 ratingRow.addEventListener('click', (e) => {
   const btn = e.target.closest('.rateBtn');
@@ -561,12 +562,10 @@ ratingRow.addEventListener('click', (e) => {
   // Store the rating value but don't log yet
   currentRating = Number(btn.getAttribute('data-rate'));
 
-  // Update visual state to show selection
+  // Update visual state to show selection (remove dimmed logic)
   document.querySelectorAll('.rateBtn').forEach(b => {
     b.classList.remove('selected');
-    b.classList.add('dimmed');
   });
-  btn.classList.remove('dimmed');
   btn.classList.add('selected');
 
   nextTestBtn.style.display = 'inline-block';
