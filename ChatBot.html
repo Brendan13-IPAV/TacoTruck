@@ -439,7 +439,7 @@
             
 <div class="actions-center">
 
-        <button id="surveyBtn" class="secondary" aria-label="I've asked my 5 questions, take me to the survey">I've asked my 5 questions, take me to the survey</button>
+        <button id="surveyBtn" class="secondary" style="display:none" aria-label="I've asked my 5 questions, take me to the survey">I've asked my 5 questions, take me to the survey</button>
       </div>
       <p class="fineprint" role="note">
         Prototype only — this does not provide accurate information, and especially does not provide legal advice.
@@ -630,6 +630,9 @@ nextTestBtn.addEventListener('click', () => {
     
     // Hide the test panel as well
     document.querySelector('.panel').style.display = 'none';
+
+    // *** ADD THIS LINE HERE: ***
+    surveyBtn.style.display = 'block';
     
     // Optional: show a completion message
     addMessage('assistant', '🎉 All tests complete! Please click "Finish & take survey" below.', {announce:true});
