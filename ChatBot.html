@@ -185,6 +185,39 @@
   .secondary{ background:var(--pill); color:var(--ink) }
   .hint{ margin-top:6px; font-size:12px; color:var(--muted); text-align:center }
 
+/* Make "Test 1 of 5" much clearer */
+#testCounter {
+  font-size: 20px;        /* was small – now clearer */
+  font-weight: 700;
+  color: var(--accentB);
+}
+
+/* Improve Topic Idea header + helper line */
+.topic-title {
+  font-size: 15px !important;
+  font-weight: 800;
+  color: var(--accentB);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topic-title .topic-subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Make the suggestion itself BIG and attention-grabbing */
+.suggestion-big {
+  font-size: 20px;            /* large + readable */
+  font-weight: 600;
+  color: #0b3b82;             /* stronger prompt colour */
+  line-height: 1.35;
+  padding: 6px 2px;
+}
+
+  
   /* Intent rating row */
   #ratingRow{
     background: color-mix(in oklab, var(--accentA) 8%, var(--bg));
@@ -361,13 +394,18 @@
       </div>
 
       <div class="panel-section">
-        <div class="panel-title">Topic idea</div>
-        <div id="suggestionWrap" class="panel-box" style="display:none;">
-          <em id="suggestionText"></em>
-          <p class="muted small" style="margin:8px 0 0">
-            How would a real user ask about this? Don't copy this text.
-          </p>
-        </div>
+<div class="panel-title topic-title">
+  Topic Idea
+  <span class="topic-subtitle">
+    (Ask like a real user — casual, amateur language. Don’t copy the text.)
+  </span>
+</div>
+
+<div id="suggestionWrap" class="panel-box" style="display:none;">
+  <div id="suggestionText" class="suggestion-big"></div>
+</div>
+
+        
       </div>
     </aside>
 
@@ -490,7 +528,7 @@ function setRandomSuggestionForTest() {
 
   // 2. Update the text on screen
   // We use the new "suggestion" field from your JSON
-  suggestionText.textContent = currentSuggestion.suggestion || "Ask a random question about IP.";
+suggestionText.textContent = currentSuggestion.suggestion || "Ask a random question about IP enforcement.";
   
   suggestionWrap.style.display = 'block';
 
